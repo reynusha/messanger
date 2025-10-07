@@ -27,13 +27,13 @@
             --accent-purple: #bf5af2;
             --accent-red: #ff453a;
             --accent-online: #34c759;
-            --accent-offline: #ff453a;
             --border-color: #38383a;
             --message-out: #2b5278;
             --message-in: #1e2c3a;
             --verified-badge: #2ea6ff;
             --like-color: #ff3b30;
             --comment-color: #2ea6ff;
+            --card-border: #2d2d2d;
         }
 
         body {
@@ -64,6 +64,7 @@
             padding: 12px 0;
             border-top: 1px solid var(--border-color);
             z-index: 1000;
+            backdrop-filter: blur(20px);
         }
 
         .nav-item {
@@ -144,17 +145,25 @@
             justify-content: center;
         }
 
+        /* Posts Feed */
         .posts-feed {
             flex: 1;
             overflow-y: auto;
             background: var(--bg-primary);
+            padding: 8px;
         }
 
         .post {
             background: var(--bg-elevated);
-            margin-bottom: 8px;
-            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 12px;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
             padding: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .post:hover {
+            border-color: var(--accent-blue);
         }
 
         .post-header {
@@ -177,6 +186,7 @@
             flex-shrink: 0;
             background-size: cover;
             background-position: center;
+            border: 2px solid var(--card-border);
         }
 
         .post-user-info {
@@ -204,7 +214,8 @@
 
         .post-content {
             margin-bottom: 12px;
-            line-height: 1.4;
+            line-height: 1.5;
+            font-size: 15px;
         }
 
         .post-image {
@@ -213,13 +224,21 @@
             margin-top: 8px;
             max-height: 400px;
             object-fit: cover;
+            border: 1px solid var(--card-border);
         }
 
         .post-actions {
             display: flex;
-            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
             padding-top: 12px;
             border-top: 1px solid var(--border-color);
+        }
+
+        .post-actions-left {
+            display: flex;
+            gap: 20px;
+            align-items: center;
         }
 
         .post-action {
@@ -229,7 +248,13 @@
             color: var(--text-secondary);
             font-size: 14px;
             cursor: pointer;
-            transition: color 0.2s ease;
+            transition: all 0.2s ease;
+            padding: 6px 12px;
+            border-radius: 8px;
+        }
+
+        .post-action:hover {
+            background: var(--bg-secondary);
         }
 
         .post-action.like.active {
@@ -240,6 +265,21 @@
             color: var(--comment-color);
         }
 
+        .post-delete {
+            color: var(--accent-red);
+            opacity: 0.7;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .post-delete:hover {
+            opacity: 1;
+            background: rgba(255, 69, 58, 0.1);
+        }
+
+        /* Comments */
         .comments-section {
             margin-top: 12px;
             padding-top: 12px;
@@ -250,9 +290,11 @@
         .comment {
             display: flex;
             margin-bottom: 12px;
-            padding: 8px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 12px;
             background: var(--bg-secondary);
+            border: 1px solid var(--card-border);
+            position: relative;
         }
 
         .comment-avatar {
@@ -260,10 +302,11 @@
             height: 32px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
-            margin-right: 8px;
+            margin-right: 12px;
             flex-shrink: 0;
             background-size: cover;
             background-position: center;
+            border: 1px solid var(--card-border);
         }
 
         .comment-content {
@@ -274,7 +317,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
 
         .comment-username {
@@ -292,19 +335,30 @@
 
         .comment-text {
             font-size: 14px;
-            line-height: 1.3;
+            line-height: 1.4;
         }
 
         .comment-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 4px;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: none;
         }
 
-        .comment-action {
-            font-size: 12px;
-            color: var(--text-secondary);
+        .comment:hover .comment-actions {
+            display: block;
+        }
+
+        .comment-delete {
+            color: var(--accent-red);
             cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .comment-delete:hover {
+            background: rgba(255, 69, 58, 0.1);
         }
 
         .add-comment {
@@ -315,13 +369,18 @@
 
         .comment-input {
             flex: 1;
-            padding: 8px 12px;
+            padding: 10px 16px;
             background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 18px;
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
             color: var(--text-primary);
             font-size: 14px;
             outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .comment-input:focus {
+            border-color: var(--accent-blue);
         }
 
         .send-comment {
@@ -329,15 +388,21 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
+            transition: all 0.2s ease;
         }
 
+        .send-comment:hover {
+            opacity: 0.9;
+        }
+
+        /* Chats List */
         .chats-list {
             flex: 1;
             overflow-y: auto;
@@ -353,25 +418,35 @@
             width: 100%;
             padding: 12px 16px;
             background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
             color: var(--text-primary);
             font-size: 15px;
             outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--accent-blue);
         }
 
         .chat-item {
-            padding: 12px 16px;
+            padding: 16px;
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
             transition: background-color 0.2s ease;
             display: flex;
             align-items: center;
             gap: 12px;
+            position: relative;
         }
 
-        .chat-item:active {
+        .chat-item:hover {
             background-color: var(--bg-secondary);
+        }
+
+        .chat-item:hover .chat-delete {
+            opacity: 1;
         }
 
         .chat-avatar {
@@ -389,6 +464,7 @@
             position: relative;
             background-size: cover;
             background-position: center;
+            border: 2px solid var(--card-border);
         }
 
         .online-status {
@@ -439,6 +515,24 @@
             text-overflow: ellipsis;
         }
 
+        .chat-delete {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-red);
+            opacity: 0;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .chat-delete:hover {
+            background: rgba(255, 69, 58, 0.1);
+        }
+
+        /* Chat Window */
         .chat-window {
             position: fixed;
             top: 0;
@@ -484,6 +578,7 @@
             position: relative;
             background-size: cover;
             background-position: center;
+            border: 2px solid var(--card-border);
         }
 
         .chat-header-info {
@@ -528,6 +623,7 @@
             position: relative;
             word-wrap: break-word;
             animation: messageAppear 0.3s ease-out;
+            border: 1px solid var(--card-border);
         }
 
         @keyframes messageAppear {
@@ -558,6 +654,7 @@
             border-radius: 8px;
             margin-top: 4px;
             cursor: pointer;
+            border: 1px solid var(--card-border);
         }
 
         .message-sticker {
@@ -571,6 +668,28 @@
             color: var(--text-secondary);
             margin-top: 4px;
             text-align: right;
+        }
+
+        .message-delete {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            color: var(--accent-red);
+            opacity: 0;
+            cursor: pointer;
+            padding: 2px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .message:hover .message-delete {
+            opacity: 0.7;
+        }
+
+        .message-delete:hover {
+            opacity: 1 !important;
+            background: rgba(255, 69, 58, 0.1);
         }
 
         .message-input-container {
@@ -593,6 +712,10 @@
             transition: background-color 0.2s ease;
         }
 
+        .attachment-button:hover {
+            background-color: var(--bg-secondary);
+        }
+
         .sticker-button {
             background: none;
             border: none;
@@ -604,11 +727,15 @@
             transition: background-color 0.2s ease;
         }
 
+        .sticker-button:hover {
+            background-color: var(--bg-secondary);
+        }
+
         .message-input {
             flex: 1;
             padding: 12px 16px;
             background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--card-border);
             border-radius: 20px;
             color: var(--text-primary);
             font-size: 15px;
@@ -618,6 +745,10 @@
             min-height: 44px;
             font-family: inherit;
             transition: border-color 0.2s ease;
+        }
+
+        .message-input:focus {
+            border-color: var(--accent-blue);
         }
 
         .send-button {
@@ -636,6 +767,15 @@
             font-size: 16px;
         }
 
+        .send-button:hover {
+            opacity: 0.9;
+        }
+
+        .send-button:disabled {
+            background: var(--text-tertiary);
+            cursor: not-allowed;
+        }
+
         .sticker-picker {
             position: absolute;
             bottom: 70px;
@@ -649,6 +789,7 @@
             gap: 8px;
             max-height: 200px;
             overflow-y: auto;
+            border: 1px solid var(--card-border);
         }
 
         .sticker-item {
@@ -657,8 +798,14 @@
             cursor: pointer;
             border-radius: 8px;
             transition: transform 0.2s ease;
+            border: 1px solid var(--card-border);
         }
 
+        .sticker-item:hover {
+            transform: scale(1.05);
+        }
+
+        /* Profile */
         .profile-content {
             flex: 1;
             overflow-y: auto;
@@ -670,6 +817,9 @@
             padding: 30px 20px 20px;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
+            border: 1px solid var(--card-border);
+            margin: 8px;
+            border-radius: 16px;
         }
 
         .profile-avatar-large {
@@ -687,6 +837,7 @@
             background-size: cover;
             background-position: center;
             position: relative;
+            border: 3px solid var(--card-border);
         }
 
         .profile-name {
@@ -716,6 +867,10 @@
             display: flex;
             justify-content: space-around;
             margin: 20px 0;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
         }
 
         .stat {
@@ -744,16 +899,20 @@
             color: var(--text-secondary);
         }
 
+        /* Settings */
         .settings-content {
             flex: 1;
             overflow-y: auto;
             background: var(--bg-primary);
+            padding: 8px;
         }
 
         .settings-section {
             background: var(--bg-elevated);
             margin: 8px 0;
             padding: 0 16px;
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
         }
 
         .settings-item {
@@ -763,6 +922,11 @@
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .settings-item:hover {
+            background: var(--bg-secondary);
         }
 
         .settings-item:last-child {
@@ -794,6 +958,7 @@
             margin-left: 8px;
         }
 
+        /* Modals */
         .modal {
             position: fixed;
             top: 0;
@@ -809,11 +974,12 @@
 
         .modal-content {
             background: var(--bg-elevated);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 20px;
             max-width: 90%;
             max-height: 90%;
             overflow-y: auto;
+            border: 1px solid var(--card-border);
         }
 
         .modal-title {
@@ -826,12 +992,17 @@
             width: 100%;
             padding: 12px 16px;
             background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
             color: var(--text-primary);
             font-size: 15px;
             margin-bottom: 16px;
             outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .modal-input:focus {
+            border-color: var(--accent-blue);
         }
 
         .modal-actions {
@@ -842,16 +1013,22 @@
 
         .modal-button {
             padding: 10px 20px;
-            border: none;
+            border: 1px solid var(--card-border);
             border-radius: 8px;
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .modal-button.primary {
             background: var(--accent-blue);
             color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .modal-button.primary:hover {
+            opacity: 0.9;
         }
 
         .modal-button.secondary {
@@ -859,6 +1036,11 @@
             color: var(--text-primary);
         }
 
+        .modal-button.secondary:hover {
+            background: var(--bg-tertiary);
+        }
+
+        /* Utility */
         .hidden {
             display: none !important;
         }
@@ -913,6 +1095,7 @@
             max-width: 90%;
             max-height: 90%;
             border-radius: 8px;
+            border: 1px solid var(--card-border);
         }
 
         .close-viewer {
@@ -931,6 +1114,7 @@
             justify-content: center;
             border-radius: 50%;
             background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--card-border);
         }
     </style>
 </head>
@@ -972,8 +1156,8 @@
                 <div class="header">
                     <div class="header-title">Chats</div>
                     <div class="header-actions">
-                        <div class="header-icon" onclick="searchUsers()">
-                            <i class="fas fa-search"></i>
+                        <div class="header-icon" onclick="clearAllChats()">
+                            <i class="fas fa-trash"></i>
                         </div>
                     </div>
                 </div>
@@ -1136,6 +1320,7 @@
     </div>
 
     <input type="file" id="avatar-upload" class="hidden" accept="image/*">
+    <input type="file" id="post-image-upload" class="hidden" accept="image/*">
 
     <script>
         class QuantumMessenger {
@@ -1149,6 +1334,7 @@
                 this.onlineUsers = new Set();
                 this.stickers = this.loadStickers();
                 this.editingField = null;
+                this.currentPostImage = null;
                 
                 this.init();
             }
@@ -1223,6 +1409,10 @@
 
                 document.getElementById('image-upload').addEventListener('change', (e) => {
                     this.handleImageUpload(e.target.files[0]);
+                });
+
+                document.getElementById('post-image-upload').addEventListener('change', (e) => {
+                    this.handlePostImageUpload(e.target.files[0]);
                 });
             }
 
@@ -1414,6 +1604,7 @@
 
                     const isLiked = post.likes.includes(this.currentUser.id);
                     const timeAgo = this.getTimeAgo(post.timestamp);
+                    const canDelete = post.userId === this.currentUser.id;
 
                     return `
                         <div class="post" data-post-id="${post.id}">
@@ -1434,17 +1625,24 @@
                                 ${post.imageUrl ? `<img src="${post.imageUrl}" class="post-image" onclick="messenger.openImageViewer('${post.imageUrl}')">` : ''}
                             </div>
                             <div class="post-actions">
-                                <div class="post-action like ${isLiked ? 'active' : ''}" onclick="messenger.toggleLike('${post.id}')">
-                                    <i class="fas fa-heart"></i>
-                                    <span>${post.likes.length}</span>
+                                <div class="post-actions-left">
+                                    <div class="post-action like ${isLiked ? 'active' : ''}" onclick="messenger.toggleLike('${post.id}')">
+                                        <i class="fas fa-heart"></i>
+                                        <span>${post.likes.length}</span>
+                                    </div>
+                                    <div class="post-action comment" onclick="messenger.toggleComments('${post.id}')">
+                                        <i class="fas fa-comment"></i>
+                                        <span>${post.comments.length}</span>
+                                    </div>
                                 </div>
-                                <div class="post-action comment" onclick="messenger.toggleComments('${post.id}')">
-                                    <i class="fas fa-comment"></i>
-                                    <span>${post.comments.length}</span>
-                                </div>
+                                ${canDelete ? `
+                                    <div class="post-delete" onclick="messenger.deletePost('${post.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                ` : ''}
                             </div>
                             <div class="comments-section" id="comments-${post.id}">
-                                ${this.renderComments(post.comments)}
+                                ${this.renderComments(post.comments, post.id)}
                                 <div class="add-comment">
                                     <input type="text" class="comment-input" id="comment-input-${post.id}" placeholder="Write a comment...">
                                     <button class="send-comment" onclick="messenger.addComment('${post.id}')">
@@ -1457,15 +1655,18 @@
                 }).join('');
             }
 
-            renderComments(comments) {
+            renderComments(comments, postId) {
                 if (comments.length === 0) return '';
+
+                const post = this.posts.find(p => p.id === postId);
+                const isPostOwner = post && post.userId === this.currentUser.id;
 
                 return comments.map(comment => {
                     const user = this.users.get(comment.userId);
                     if (!user) return '';
 
                     const timeAgo = this.getTimeAgo(comment.timestamp);
-                    const canDelete = comment.userId === this.currentUser.id;
+                    const canDelete = comment.userId === this.currentUser.id || isPostOwner;
 
                     return `
                         <div class="comment" data-comment-id="${comment.id}">
@@ -1483,7 +1684,9 @@
                                 <div class="comment-text">${comment.content}</div>
                                 ${canDelete ? `
                                     <div class="comment-actions">
-                                        <div class="comment-action" onclick="messenger.deleteComment('${comment.id}')">Delete</div>
+                                        <div class="comment-delete" onclick="messenger.deleteComment('${comment.id}', '${postId}')">
+                                            <i class="fas fa-trash"></i>
+                                        </div>
                                     </div>
                                 ` : ''}
                             </div>
@@ -1505,6 +1708,7 @@
 
                 this.saveData();
                 this.updatePostsFeed();
+                this.updateProfile();
             }
 
             toggleComments(postId) {
@@ -1535,33 +1739,52 @@
                 
                 input.value = '';
                 this.updatePostsFeed();
+                
+                const commentsSection = document.getElementById(`comments-${postId}`);
+                if (commentsSection) {
+                    commentsSection.style.display = 'block';
+                }
             }
 
-            deleteComment(commentId) {
-                for (const post of this.posts) {
-                    const commentIndex = post.comments.findIndex(c => c.id === commentId);
-                    if (commentIndex > -1) {
-                        post.comments.splice(commentIndex, 1);
-                        this.saveData();
-                        this.updatePostsFeed();
-                        break;
-                    }
+            deleteComment(commentId, postId) {
+                const post = this.posts.find(p => p.id === postId);
+                if (!post) return;
+
+                const commentIndex = post.comments.findIndex(c => c.id === commentId);
+                if (commentIndex > -1) {
+                    post.comments.splice(commentIndex, 1);
+                    this.saveData();
+                    this.updatePostsFeed();
+                }
+            }
+
+            deletePost(postId) {
+                if (!confirm('Delete this post?')) return;
+
+                const postIndex = this.posts.findIndex(p => p.id === postId);
+                if (postIndex > -1 && this.posts[postIndex].userId === this.currentUser.id) {
+                    this.posts.splice(postIndex, 1);
+                    this.saveData();
+                    this.updatePostsFeed();
+                    this.updateProfile();
                 }
             }
 
             createNewPost() {
+                this.currentPostImage = null;
+                document.getElementById('post-content').value = '';
                 document.getElementById('post-modal').style.display = 'flex';
             }
 
             publishPost() {
                 const content = document.getElementById('post-content').value.trim();
-                if (!content) return;
+                if (!content && !this.currentPostImage) return;
 
                 const newPost = {
                     id: `post_${Date.now()}`,
                     userId: this.currentUser.id,
                     content: content,
-                    imageUrl: '',
+                    imageUrl: this.currentPostImage || '',
                     timestamp: Date.now(),
                     likes: [],
                     comments: []
@@ -1577,6 +1800,19 @@
             closePostModal() {
                 document.getElementById('post-modal').style.display = 'none';
                 document.getElementById('post-content').value = '';
+                this.currentPostImage = null;
+            }
+
+            handlePostImageUpload(file) {
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.currentPostImage = e.target.result;
+                    document.getElementById('post-image-upload').value = '';
+                };
+
+                reader.readAsDataURL(file);
             }
 
             updateChatsList() {
@@ -1628,11 +1864,31 @@
                                 ${user.username ? `<div class="chat-username">@${user.username}</div>` : ''}
                                 <div class="chat-last-message">${lastMessageText}</div>
                             </div>
+                            <div class="chat-delete" onclick="event.stopPropagation(); messenger.deleteChat('${userId}')">
+                                <i class="fas fa-trash"></i>
+                            </div>
                         </div>
                     `;
                 }).join('');
 
                 container.innerHTML = chatItems;
+            }
+
+            deleteChat(userId) {
+                if (!confirm('Delete this chat?')) return;
+
+                const chatKey = this.getChatKey(this.currentUser.id, userId);
+                this.chats.delete(chatKey);
+                this.saveData();
+                this.updateChatsList();
+            }
+
+            clearAllChats() {
+                if (!confirm('Clear all chat history?')) return;
+                
+                this.chats.clear();
+                this.saveData();
+                this.updateChatsList();
             }
 
             searchUsers(query) {
@@ -1791,11 +2047,29 @@
                         <div class="message ${isOutgoing ? 'outgoing' : 'incoming'}">
                             ${content}
                             <div class="message-time">${time}</div>
+                            <div class="message-delete" onclick="messenger.deleteMessage('${message.id}')">
+                                <i class="fas fa-trash"></i>
+                            </div>
                         </div>
                     `;
                 }).join('');
 
                 container.scrollTop = container.scrollHeight;
+            }
+
+            deleteMessage(messageId) {
+                if (!this.currentChat) return;
+
+                const chatKey = this.getChatKey(this.currentUser.id, this.currentChat);
+                const messages = this.chats.get(chatKey);
+                if (!messages) return;
+
+                const messageIndex = messages.findIndex(m => m.id === messageId);
+                if (messageIndex > -1 && messages[messageIndex].senderId === this.currentUser.id) {
+                    messages.splice(messageIndex, 1);
+                    this.saveData();
+                    this.updateChatWindow();
+                }
             }
 
             sendMessage() {
@@ -1965,33 +2239,23 @@
                                 ${post.imageUrl ? `<img src="${post.imageUrl}" class="post-image" onclick="messenger.openImageViewer('${post.imageUrl}')">` : ''}
                             </div>
                             <div class="post-actions">
-                                <div class="post-action like ${isLiked ? 'active' : ''}" onclick="messenger.toggleLike('${post.id}')">
-                                    <i class="fas fa-heart"></i>
-                                    <span>${post.likes.length}</span>
+                                <div class="post-actions-left">
+                                    <div class="post-action like ${isLiked ? 'active' : ''}" onclick="messenger.toggleLike('${post.id}')">
+                                        <i class="fas fa-heart"></i>
+                                        <span>${post.likes.length}</span>
+                                    </div>
+                                    <div class="post-action comment" onclick="messenger.toggleComments('${post.id}')">
+                                        <i class="fas fa-comment"></i>
+                                        <span>${post.comments.length}</span>
+                                    </div>
                                 </div>
-                                <div class="post-action comment" onclick="messenger.toggleComments('${post.id}')">
-                                    <i class="fas fa-comment"></i>
-                                    <span>${post.comments.length}</span>
-                                </div>
-                                <div class="post-action" onclick="messenger.deletePost('${post.id}')" style="margin-left: auto;">
+                                <div class="post-delete" onclick="messenger.deletePost('${post.id}')">
                                     <i class="fas fa-trash"></i>
                                 </div>
                             </div>
                         </div>
                     `;
                 }).join('');
-            }
-
-            deletePost(postId) {
-                if (!confirm('Delete this post?')) return;
-
-                const postIndex = this.posts.findIndex(p => p.id === postId);
-                if (postIndex > -1 && this.posts[postIndex].userId === this.currentUser.id) {
-                    this.posts.splice(postIndex, 1);
-                    this.saveData();
-                    this.updatePostsFeed();
-                    this.updateProfile();
-                }
             }
 
             updateSettings() {
@@ -2225,6 +2489,10 @@
 
         function closeImageViewer() {
             messenger.closeImageViewer();
+        }
+
+        function clearAllChats() {
+            messenger.clearAllChats();
         }
 
         const messenger = new QuantumMessenger();
