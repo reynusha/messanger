@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum</title>
+    <title>Quantum Messenger</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -18,28 +18,30 @@
             --bg-primary: #0f0f0f;
             --bg-secondary: #1a1a1a;
             --bg-tertiary: #2a2a2a;
+            --bg-elevated: #1e1e1e;
             --text-primary: #ffffff;
             --text-secondary: #8e8e93;
             --text-tertiary: #48484a;
             --accent-blue: #2ea6ff;
             --accent-green: #34c759;
             --accent-purple: #bf5af2;
-            --accent-orange: #ff9500;
+            --accent-red: #ff453a;
+            --accent-online: #34c759;
+            --accent-offline: #ff453a;
             --border-color: #38383a;
             --message-out: #2b5278;
             --message-in: #1e2c3a;
-            --post-bg: #1e1e1e;
-            --online: #34c759;
-            --offline: #ff3b30;
-            --tg-bg: #18222d;
-            --tg-secondary: #2b5278;
+            --verified-badge: #2ea6ff;
+            --like-color: #ff3b30;
+            --comment-color: #2ea6ff;
         }
 
         body {
-            background: var(--tg-bg);
+            background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
         .app {
@@ -48,68 +50,77 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
-        .welcome-screen {
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-elevated);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            padding: 20px;
-            text-align: center;
-            background: var(--tg-bg);
-        }
-
-        .welcome-logo {
-            font-size: 52px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #bf5af2 0%, #2ea6ff 50%, #34c759 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 16px;
-        }
-
-        .welcome-subtitle {
-            font-size: 18px;
             color: var(--text-secondary);
-            margin-bottom: 40px;
-        }
-
-        .telegram-button {
-            background: var(--accent-blue);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 16px 32px;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 300px;
+            transition: all 0.2s ease;
+            padding: 4px 12px;
+            border-radius: 12px;
+            min-width: 60px;
         }
 
-        .telegram-button:active {
-            opacity: 0.8;
-            transform: scale(0.98);
+        .nav-item.active {
+            color: var(--accent-blue);
+            background: rgba(46, 166, 255, 0.1);
         }
 
-        .main-app {
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow: hidden;
+            padding-bottom: 70px;
+        }
+
+        .tab-content {
             display: none;
+            height: 100%;
             flex-direction: column;
-            height: 100vh;
-            background: var(--tg-bg);
+        }
+
+        .tab-content.active {
+            display: flex;
         }
 
         .header {
-            background: var(--tg-bg);
+            background: var(--bg-primary);
             padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header-title {
@@ -133,79 +144,213 @@
             justify-content: center;
         }
 
-        .header-icon:active {
-            opacity: 1;
-        }
-
-        .tabs {
-            display: flex;
-            background: var(--tg-bg);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .tab {
+        .posts-feed {
             flex: 1;
+            overflow-y: auto;
+            background: var(--bg-primary);
+        }
+
+        .post {
+            background: var(--bg-elevated);
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
             padding: 16px;
-            text-align: center;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.3s ease;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            font-weight: 600;
+            color: white;
+            margin-right: 12px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
         }
 
-        .tab.active {
-            color: var(--accent-blue);
-            border-bottom-color: var(--accent-blue);
-        }
-
-        .content {
+        .post-user-info {
             flex: 1;
-            overflow: hidden;
+        }
+
+        .post-username {
+            font-size: 15px;
+            font-weight: 600;
             display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .tab-content {
-            flex: 1;
+        .verified-badge {
+            color: var(--verified-badge);
+            font-size: 14px;
+        }
+
+        .post-time {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .post-content {
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .post-image {
+            width: 100%;
+            border-radius: 12px;
+            margin-top: 8px;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 20px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .post-action {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .post-action.like.active {
+            color: var(--like-color);
+        }
+
+        .post-action.comment.active {
+            color: var(--comment-color);
+        }
+
+        .comments-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
             display: none;
-            flex-direction: column;
-            opacity: 0;
-            transition: opacity 0.3s ease;
         }
 
-        .tab-content.active {
+        .comment {
             display: flex;
-            opacity: 1;
+            margin-bottom: 12px;
+            padding: 8px;
+            border-radius: 8px;
+            background: var(--bg-secondary);
         }
 
-        /* Chats List - Telegram Style */
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            margin-right: 8px;
+            flex-shrink: 0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .comment-username {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .comment-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .comment-text {
+            font-size: 14px;
+            line-height: 1.3;
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .comment-action {
+            font-size: 12px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .add-comment {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .comment-input {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            color: var(--text-primary);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .send-comment {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
         .chats-list {
             flex: 1;
             overflow-y: auto;
-            background: var(--tg-bg);
+            background: var(--bg-primary);
         }
 
         .search-container {
             padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .search-icon {
-            color: var(--text-tertiary);
         }
 
         .search-input {
-            flex: 1;
+            width: 100%;
             padding: 12px 16px;
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
@@ -213,22 +358,16 @@
             color: var(--text-primary);
             font-size: 15px;
             outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            border-color: var(--accent-blue);
         }
 
         .chat-item {
             padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
+            transition: background-color 0.2s ease;
             display: flex;
             align-items: center;
             gap: 12px;
-            transition: all 0.2s ease;
-            position: relative;
         }
 
         .chat-item:active {
@@ -239,17 +378,17 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #bf5af2 0%, #2ea6ff 100%);
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
             color: white;
             font-size: 18px;
-            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
             background-size: cover;
             background-position: center;
-            position: relative;
         }
 
         .online-status {
@@ -259,15 +398,11 @@
             width: 12px;
             height: 12px;
             border-radius: 50%;
-            border: 2px solid var(--tg-bg);
+            border: 2px solid var(--bg-primary);
         }
 
-        .online {
-            background: var(--online);
-        }
-
-        .offline {
-            background: var(--offline);
+        .online-status.online {
+            background: var(--accent-online);
         }
 
         .chat-info {
@@ -275,28 +410,25 @@
             min-width: 0;
         }
 
-        .chat-name-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
         .chat-name {
             font-size: 16px;
             font-weight: 600;
+            margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
-        .chat-time {
-            font-size: 12px;
-            color: var(--text-tertiary);
+        .chat-username {
+            font-size: 14px;
+            color: var(--accent-blue);
+            margin-bottom: 4px;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .chat-last-message {
@@ -307,51 +439,235 @@
             text-overflow: ellipsis;
         }
 
-        .verified-badge {
-            color: var(--accent-blue);
-            font-size: 14px;
+        .chat-window {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-primary);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
         }
 
-        /* Menu Items */
-        .menu-item {
-            padding: 16px;
+        .chat-header {
+            padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 12px;
+            background: var(--bg-primary);
         }
 
-        .menu-item:active {
-            background-color: var(--bg-secondary);
-        }
-
-        .menu-item i {
-            width: 24px;
+        .back-button {
+            background: none;
+            border: none;
             color: var(--accent-blue);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            margin-right: 4px;
         }
 
-        .menu-item-text {
+        .chat-header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            flex-shrink: 0;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .chat-header-info {
             flex: 1;
+            min-width: 0;
+        }
+
+        .chat-header-name {
+            font-size: 16px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-header-status {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 15px;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+            animation: messageAppear 0.3s ease-out;
+        }
+
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.outgoing {
+            align-self: flex-end;
+            background: var(--message-out);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.incoming {
+            align-self: flex-start;
+            background: var(--message-in);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-image {
+            max-width: 200px;
+            border-radius: 8px;
+            margin-top: 4px;
+            cursor: pointer;
+        }
+
+        .message-sticker {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message-input-container {
+            padding: 12px 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            background: var(--bg-primary);
+        }
+
+        .attachment-button {
+            background: none;
+            border: none;
+            color: var(--accent-blue);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+
+        .sticker-button {
+            background: none;
+            border: none;
+            color: var(--accent-purple);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            color: var(--text-primary);
+            font-size: 15px;
+            outline: none;
+            resize: none;
+            max-height: 120px;
+            min-height: 44px;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+        }
+
+        .send-button {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
             font-size: 16px;
         }
 
-        .menu-item-arrow {
-            color: var(--text-tertiary);
+        .sticker-picker {
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            right: 0;
+            background: var(--bg-elevated);
+            border-top: 1px solid var(--border-color);
+            padding: 16px;
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
-        /* Profile */
+        .sticker-item {
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+
         .profile-content {
             flex: 1;
             overflow-y: auto;
-            padding: 0;
-            background: var(--tg-bg);
+            background: var(--bg-primary);
         }
 
         .profile-header {
-            background: var(--bg-secondary);
-            padding: 20px 16px;
+            background: var(--bg-elevated);
+            padding: 30px 20px 20px;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
         }
@@ -360,488 +676,191 @@
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #bf5af2 0%, #2ea6ff 100%);
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            margin: 0 auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 36px;
             font-weight: 600;
             color: white;
-            margin: 0 auto 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 4px solid var(--tg-bg);
             background-size: cover;
             background-position: center;
             position: relative;
         }
 
-        .avatar-upload {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 4px;
-            text-align: center;
-            font-size: 12px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .profile-avatar-large:hover .avatar-upload {
-            opacity: 1;
-        }
-
         .profile-name {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
             margin-bottom: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .profile-username {
-            font-size: 15px;
+            font-size: 16px;
             color: var(--accent-blue);
             margin-bottom: 8px;
         }
 
         .profile-bio {
-            font-size: 14px;
+            font-size: 15px;
             color: var(--text-secondary);
             margin-bottom: 16px;
             line-height: 1.4;
-            max-width: 300px;
-            margin-left: auto;
-            margin-right: auto;
         }
 
-        .profile-status {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-        }
-
-        .profile-actions {
+        .profile-stats {
             display: flex;
-            gap: 12px;
-            justify-content: center;
+            justify-content: space-around;
+            margin: 20px 0;
         }
 
-        .profile-action-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        .stat {
+            text-align: center;
         }
 
-        .message-btn {
-            background: var(--accent-blue);
-            color: white;
-        }
-
-        .edit-btn {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .profile-info {
-            padding: 16px;
-        }
-
-        .info-section {
-            margin-bottom: 20px;
-        }
-
-        .info-title {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .info-value {
-            font-size: 15px;
-            color: var(--text-primary);
-            padding: 8px 0;
-        }
-
-        .info-edit {
-            color: var(--accent-blue);
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        .select-input, .text-input, .textarea-input {
-            width: 100%;
-            padding: 10px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 15px;
-            margin-bottom: 8px;
-            outline: none;
-        }
-
-        .textarea-input {
-            resize: none;
-            min-height: 60px;
-        }
-
-        .save-info-btn {
-            width: 100%;
-            padding: 10px;
-            background: var(--accent-blue);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-
-        /* Posts */
-        .posts-section {
-            padding: 16px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .posts-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .post {
-            background: var(--post-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-        }
-
-        .post-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .post-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #bf5af2 0%, #2ea6ff 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: white;
-            background-size: cover;
-            background-position: center;
-            font-size: 14px;
-        }
-
-        .post-author {
-            flex: 1;
-        }
-
-        .post-author-name {
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .post-time {
-            font-size: 11px;
-            color: var(--text-tertiary);
-        }
-
-        .post-content {
-            margin-bottom: 12px;
-            line-height: 1.4;
-            font-size: 14px;
-        }
-
-        .post-image {
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            max-height: 300px;
-            object-fit: cover;
-        }
-
-        .post-stats {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        .post-actions {
-            display: flex;
-            gap: 16px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 12px;
-        }
-
-        .post-action {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 13px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: color 0.3s ease;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-
-        .post-action:active {
-            background: var(--bg-tertiary);
-        }
-
-        .post-action.active {
-            color: var(--accent-blue);
-        }
-
-        .delete-post {
-            color: #ff3b30;
-        }
-
-        .comments-section {
-            margin-top: 12px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 12px;
-        }
-
-        .comment {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            position: relative;
-        }
-
-        .comment-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: var(--bg-tertiary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
-        }
-
-        .comment-content {
-            flex: 1;
-            background: var(--bg-tertiary);
-            padding: 8px 12px;
-            border-radius: 12px;
-            font-size: 13px;
-            position: relative;
-        }
-
-        .comment-author {
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .delete-comment {
-            position: absolute;
-            top: 4px;
-            right: 8px;
-            color: #ff3b30;
-            cursor: pointer;
-            font-size: 12px;
-            opacity: 0.7;
-        }
-
-        .delete-comment:hover {
-            opacity: 1;
-        }
-
-        .comment-input {
-            width: 100%;
-            padding: 8px 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            color: var(--text-primary);
-            font-size: 13px;
-            outline: none;
-            margin-top: 8px;
-        }
-
-        /* Channels */
-        .channel-item {
-            padding: 16px;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .channel-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #ff9500 0%, #bf5af2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: white;
+        .stat-value {
             font-size: 18px;
-        }
-
-        .channel-info {
-            flex: 1;
-        }
-
-        .channel-name {
-            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 4px;
+            display: block;
         }
 
-        .channel-subscribers {
-            font-size: 14px;
+        .stat-label {
+            font-size: 12px;
             color: var(--text-secondary);
         }
 
-        /* Settings */
-        .settings-section {
-            margin-bottom: 20px;
+        .profile-posts {
+            padding: 16px;
         }
 
-        .settings-title {
+        .profile-posts-title {
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+
+        .settings-content {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg-primary);
+        }
+
+        .settings-section {
+            background: var(--bg-elevated);
+            margin: 8px 0;
             padding: 0 16px;
         }
 
         .settings-item {
-            padding: 16px;
+            padding: 16px 0;
             border-bottom: 1px solid var(--border-color);
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 12px;
             cursor: pointer;
         }
 
-        .settings-item:active {
-            background: var(--bg-secondary);
+        .settings-item:last-child {
+            border-bottom: none;
         }
 
-        .settings-item i {
-            width: 24px;
-            color: var(--accent-blue);
-        }
-
-        .settings-item-text {
+        .settings-item-info {
             flex: 1;
+        }
+
+        .settings-item-title {
             font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .settings-item-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .settings-item-value {
+            font-size: 14px;
+            color: var(--text-secondary);
         }
 
         .settings-item-arrow {
             color: var(--text-tertiary);
+            margin-left: 8px;
         }
 
-        /* Modal Windows */
         .modal {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
             align-items: center;
             justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
+            z-index: 2000;
         }
 
         .modal-content {
-            background: var(--bg-secondary);
+            background: var(--bg-elevated);
             border-radius: 12px;
             padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
+            max-width: 90%;
+            max-height: 90%;
             overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
         }
 
         .modal-title {
             font-size: 18px;
             font-weight: 600;
+            margin-bottom: 16px;
         }
 
-        .close-modal {
-            background: none;
+        .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 15px;
+            margin-bottom: 16px;
+            outline: none;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
             border: none;
-            color: var(--text-secondary);
-            font-size: 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
         }
 
-        /* Utility Classes */
-        .back-button {
-            background: none;
-            border: none;
-            color: var(--accent-blue);
-            font-size: 16px;
-            cursor: pointer;
-            padding: 8px;
-            margin-right: 8px;
-            transition: all 0.3s ease;
+        .modal-button.primary {
+            background: var(--accent-blue);
+            color: white;
         }
 
-        .back-button:active {
-            transform: scale(0.9);
+        .modal-button.secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
+        .hidden {
+            display: none !important;
         }
 
         .empty-state {
@@ -850,279 +869,273 @@
             color: var(--text-secondary);
         }
 
-        .error-message {
-            background: #ff4444;
-            color: white;
-            padding: 10px;
-            margin: 10px;
-            border-radius: 8px;
-            text-align: center;
-            transition: all 0.3s ease;
+        .empty-title {
+            font-size: 16px;
+            margin-bottom: 8px;
         }
 
-        .hidden {
-            display: none !important;
-        }
-
-        .create-post-btn, .create-channel-btn {
-            width: 100%;
-            padding: 12px;
-            background: var(--accent-blue);
+        .creator-badge {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
             color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
             font-weight: 600;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .nft-info {
+            background: rgba(191, 90, 242, 0.1);
+            border: 1px solid var(--accent-purple);
+            border-radius: 8px;
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 13px;
+            line-height: 1.4;
+            color: var(--accent-purple);
+        }
+
+        .image-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .image-viewer img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+
+        .close-viewer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
             cursor: pointer;
-            margin-bottom: 16px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 <body>
-    <div class="welcome-screen" id="welcome-screen">
-        <div class="welcome-logo">Quantum</div>
-        <div class="welcome-subtitle">Secure Messenger</div>
-        <button class="telegram-button" id="telegram-auth-button">
-            Continue with Telegram
-        </button>
-        <div id="error-message" class="error-message" style="display: none;"></div>
-    </div>
-
-    <div class="main-app" id="main-app">
-        <div class="header">
-            <div class="header-title" id="header-title">Chats</div>
-            <div class="header-actions">
-                <div class="header-icon" id="search-toggle">
-                    <i class="fas fa-search"></i>
-                </div>
-                <div class="header-icon" id="new-chat-btn">
-                    <i class="fas fa-edit"></i>
-                </div>
+    <div class="app">
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home')">
+                <div class="nav-icon"><i class="fas fa-home"></i></div>
+                <span>Home</span>
             </div>
-        </div>
+            <div class="nav-item" onclick="switchTab('chats')">
+                <div class="nav-icon"><i class="fas fa-comment"></i></div>
+                <span>Chats</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('profile')">
+                <div class="nav-icon"><i class="fas fa-user"></i></div>
+                <span>Profile</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('settings')">
+                <div class="nav-icon"><i class="fas fa-cog"></i></div>
+                <span>Settings</span>
+            </div>
+        </nav>
 
-        <div class="tabs">
-            <button class="tab active" onclick="quantum.switchTab('chats')">
-                <i class="fas fa-comments"></i>
-                Chats
-            </button>
-            <button class="tab" onclick="quantum.switchTab('channels')">
-                <i class="fas fa-broadcast-tower"></i>
-                Channels
-            </button>
-            <button class="tab" onclick="quantum.switchTab('profile')">
-                <i class="fas fa-user"></i>
-                Profile
-            </button>
-        </div>
+        <div class="main-content">
+            <div id="home-tab" class="tab-content active">
+                <div class="header">
+                    <div class="header-title">Feed</div>
+                    <div class="header-actions">
+                        <div class="header-icon" onclick="createNewPost()">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="posts-feed" id="posts-feed"></div>
+            </div>
 
-        <div class="content">
-            <!-- Chats Tab -->
-            <div id="chats-tab" class="tab-content active">
+            <div id="chats-tab" class="tab-content">
+                <div class="header">
+                    <div class="header-title">Chats</div>
+                    <div class="header-actions">
+                        <div class="header-icon" onclick="searchUsers()">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
+                </div>
                 <div class="chats-list">
                     <div class="search-container">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="search-input" placeholder="Search" id="user-search">
+                        <input type="text" class="search-input" placeholder="Search by username..." id="user-search">
                     </div>
-                    <div id="chats-container">
-                        <div class="loading">Loading...</div>
-                    </div>
+                    <div id="chats-container"></div>
                 </div>
             </div>
 
-            <!-- Channels Tab -->
-            <div id="channels-tab" class="tab-content">
-                <div class="chats-list">
-                    <div class="search-container">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" class="search-input" placeholder="Search channels" id="channel-search">
-                    </div>
-                    <button class="create-channel-btn" onclick="quantum.openCreateChannelModal()">
-                        <i class="fas fa-plus"></i>
-                        Create Channel
-                    </button>
-                    <div id="channels-container">
-                        <div class="empty-state">No channels yet</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Profile Tab -->
             <div id="profile-tab" class="tab-content">
                 <div class="profile-content">
                     <div class="profile-header">
-                        <div class="profile-avatar-large" id="profile-avatar-large">
-                            <div class="avatar-upload">Change</div>
+                        <div class="profile-avatar-large" id="profile-avatar-large" onclick="changeAvatar()">
+                            <i class="fas fa-user" id="profile-avatar-icon"></i>
                         </div>
-                        <div class="profile-name" id="profile-name">User Name</div>
+                        <div class="profile-name" id="profile-name">
+                            <span id="profile-display-name">User</span>
+                            <span class="verified-badge" id="profile-verified-badge" style="display: none;"><i class="fas fa-check-circle"></i></span>
+                        </div>
                         <div class="profile-username" id="profile-username">@username</div>
                         <div class="profile-bio" id="profile-bio">No bio yet</div>
-                    </div>
-
-                    <div class="menu">
-                        <div class="menu-item" onclick="quantum.openSettings()">
-                            <i class="fas fa-cog"></i>
-                            <div class="menu-item-text">Settings</div>
-                            <i class="fas fa-chevron-right menu-item-arrow"></i>
-                        </div>
-                        <div class="menu-item" onclick="quantum.openEditProfile()">
-                            <i class="fas fa-edit"></i>
-                            <div class="menu-item-text">Edit Profile</div>
-                            <i class="fas fa-chevron-right menu-item-arrow"></i>
-                        </div>
-                        <div class="menu-item" onclick="quantum.openCreatePostModal()">
-                            <i class="fas fa-plus"></i>
-                            <div class="menu-item-text">Create Post</div>
-                            <i class="fas fa-chevron-right menu-item-arrow"></i>
+                        <div id="creator-badge" class="creator-badge" style="display: none;">Project Creator</div>
+                        <div class="profile-stats">
+                            <div class="stat">
+                                <span class="stat-value" id="stat-posts">0</span>
+                                <span class="stat-label">posts</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value" id="stat-followers">0</span>
+                                <span class="stat-label">followers</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value" id="stat-following">0</span>
+                                <span class="stat-label">following</span>
+                            </div>
                         </div>
                     </div>
+                    <div class="profile-posts">
+                        <div class="profile-posts-title">My Posts</div>
+                        <div id="profile-posts-container"></div>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="posts-section">
-                        <div class="posts-title">
-                            <i class="fas fa-newspaper"></i>
-                            My Posts
+            <div id="settings-tab" class="tab-content">
+                <div class="header">
+                    <div class="header-title">Settings</div>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-section">
+                        <div class="settings-item" onclick="openEditModal('name')">
+                            <div class="settings-item-info">
+                                <div class="settings-item-title">Name</div>
+                                <div class="settings-item-description" id="current-name">User</div>
+                            </div>
+                            <div class="settings-item-arrow"><i class="fas fa-chevron-right"></i></div>
                         </div>
-                        <div id="posts-container">
-                            <div class="empty-state">No posts yet</div>
+                        <div class="settings-item" onclick="openEditModal('username')">
+                            <div class="settings-item-info">
+                                <div class="settings-item-title">Username</div>
+                                <div class="settings-item-description" id="current-username">@username</div>
+                            </div>
+                            <div class="settings-item-arrow"><i class="fas fa-chevron-right"></i></div>
+                        </div>
+                        <div class="settings-item" onclick="openEditModal('bio')">
+                            <div class="settings-item-info">
+                                <div class="settings-item-title">Bio</div>
+                                <div class="settings-item-description" id="current-bio">Not set</div>
+                            </div>
+                            <div class="settings-item-arrow"><i class="fas fa-chevron-right"></i></div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <div class="settings-item" onclick="changeAvatar()">
+                            <div class="settings-item-info">
+                                <div class="settings-item-title">Change Avatar</div>
+                                <div class="settings-item-description">Upload new profile photo</div>
+                            </div>
+                            <div class="settings-item-arrow"><i class="fas fa-chevron-right"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <div class="nft-info">
+                            <strong>Collectible Usernames</strong><br>
+                            Your username can become a unique digital asset. In the future, you will be able to trade valuable usernames for Quantum cryptocurrency in our marketplace.
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Settings Screen -->
-    <div class="settings-screen" id="settings-screen" style="display: none;">
-        <div class="header">
-            <button class="back-button" onclick="quantum.closeSettings()">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <div class="header-title">Settings</div>
-        </div>
-        <div class="profile-content">
-            <div class="settings-section">
-                <div class="settings-title">Account</div>
-                <div class="settings-item" onclick="quantum.openEditProfile()">
-                    <i class="fas fa-user-edit"></i>
-                    <div class="settings-item-text">Edit Profile</div>
-                    <i class="fas fa-chevron-right settings-item-arrow"></i>
+        <div class="chat-window" id="chat-window">
+            <div class="chat-header">
+                <button class="back-button" onclick="closeChat()">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <div class="chat-header-avatar" id="chat-header-avatar">
+                    <div class="online-status" id="chat-online-status"></div>
                 </div>
-                <div class="settings-item" onclick="quantum.openUsernameSettings()">
-                    <i class="fas fa-at"></i>
-                    <div class="settings-item-text">Username</div>
-                    <i class="fas fa-chevron-right settings-item-arrow"></i>
+                <div class="chat-header-info">
+                    <div class="chat-header-name" id="chat-header-name">
+                        User
+                        <span class="verified-badge" id="chat-verified-badge" style="display: none;"><i class="fas fa-check-circle"></i></span>
+                    </div>
+                    <div class="chat-header-status" id="chat-header-status">Online</div>
                 </div>
             </div>
             
-            <div class="settings-section">
-                <div class="settings-title">Privacy</div>
-                <div class="settings-item">
-                    <i class="fas fa-lock"></i>
-                    <div class="settings-item-text">Privacy & Security</div>
-                    <i class="fas fa-chevron-right settings-item-arrow"></i>
-                </div>
-                <div class="settings-item">
-                    <i class="fas fa-bell"></i>
-                    <div class="settings-item-text">Notifications</div>
-                    <i class="fas fa-chevron-right settings-item-arrow"></i>
-                </div>
+            <div class="messages-container" id="messages-container"></div>
+            
+            <div class="message-input-container">
+                <button class="attachment-button" onclick="document.getElementById('image-upload').click()">
+                    <i class="fas fa-image"></i>
+                </button>
+                <input type="file" id="image-upload" class="hidden" accept="image/*">
+                <button class="sticker-button" onclick="toggleStickerPicker()">
+                    <i class="fas fa-smile"></i>
+                </button>
+                <textarea class="message-input" placeholder="Type a message..." id="message-input" rows="1"></textarea>
+                <button class="send-button" id="send-button" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <div class="sticker-picker" id="sticker-picker"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <div class="modal-title" id="modal-title">Edit</div>
+            <input type="text" class="modal-input" id="modal-input" placeholder="Enter value">
+            <div class="modal-actions">
+                <button class="modal-button secondary" onclick="closeModal()">Cancel</button>
+                <button class="modal-button primary" onclick="saveModal()">Save</button>
             </div>
         </div>
     </div>
 
-    <!-- Edit Profile Modal -->
-    <div class="modal" id="edit-profile-modal">
+    <div class="modal" id="post-modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Edit Profile</div>
-                <button class="close-modal" onclick="quantum.closeEditProfile()">
-                    <i class="fas fa-times"></i>
-                </button>
+            <div class="modal-title">New Post</div>
+            <textarea class="modal-input" id="post-content" placeholder="What's new?" rows="4"></textarea>
+            <div class="modal-actions">
+                <button class="modal-button secondary" onclick="closePostModal()">Cancel</button>
+                <button class="modal-button primary" onclick="publishPost()">Publish</button>
             </div>
-            <input type="text" class="text-input" id="edit-firstname" placeholder="First Name">
-            <input type="text" class="text-input" id="edit-lastname" placeholder="Last Name">
-            <textarea class="textarea-input" id="edit-bio" placeholder="Bio" maxlength="70"></textarea>
-            <select class="select-input" id="edit-worldview">
-                <option value="">Worldview</option>
-                <option value="Christianity">Christianity</option>
-                <option value="Agnosticism">Agnosticism</option>
-                <option value="Atheism">Atheism</option>
-            </select>
-            <select class="select-input" id="edit-politics">
-                <option value="">Political Views</option>
-                <option value="Centrist">Centrist</option>
-                <option value="Left-wing">Left-wing</option>
-                <option value="Right-wing">Right-wing</option>
-            </select>
-            <input type="text" class="text-input" id="edit-quote" placeholder="Favorite Quote" maxlength="40">
-            <button class="save-info-btn" onclick="quantum.saveProfile()">
-                Save Changes
-            </button>
         </div>
     </div>
 
-    <!-- Username Settings Modal -->
-    <div class="modal" id="username-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Username</div>
-                <button class="close-modal" onclick="quantum.closeUsernameSettings()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <input type="text" class="text-input" id="username-input" placeholder="@username">
-            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 15px;">
-                You can choose a username. If you do, people will be able to find you by this username and contact you without knowing your phone number.
-            </div>
-            <button class="save-info-btn" onclick="quantum.saveUsername()">
-                Save Username
-            </button>
-        </div>
+    <div class="image-viewer" id="image-viewer">
+        <button class="close-viewer" onclick="closeImageViewer()">
+            <i class="fas fa-times"></i>
+        </button>
+        <img id="viewer-image" src="" alt="">
     </div>
 
-    <!-- Create Post Modal -->
-    <div class="modal" id="create-post-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Create Post</div>
-                <button class="close-modal" onclick="quantum.closeCreatePostModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <textarea class="post-textarea" id="post-text" placeholder="What's on your mind?"></textarea>
-            <img class="image-preview" id="post-image-preview">
-            <input type="file" id="post-image-input" accept="image/*" style="display: none;">
-            <button class="image-upload-btn" onclick="document.getElementById('post-image-input').click()">
-                <i class="fas fa-image"></i>
-                Add Image
-            </button>
-            <button class="create-post-submit" onclick="quantum.createPost()">
-                <i class="fas fa-share"></i>
-                Post
-            </button>
-        </div>
-    </div>
-
-    <!-- Create Channel Modal -->
-    <div class="modal" id="create-channel-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Create Channel</div>
-                <button class="close-modal" onclick="quantum.closeCreateChannelModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <input type="text" class="text-input" id="channel-name" placeholder="Channel Name">
-            <textarea class="textarea-input" id="channel-description" placeholder="Channel Description"></textarea>
-            <button class="save-info-btn" onclick="quantum.createChannel()">
-                Create Channel
-            </button>
-        </div>
-    </div>
+    <input type="file" id="avatar-upload" class="hidden" accept="image/*">
 
     <script>
         class QuantumMessenger {
@@ -1130,40 +1143,60 @@
                 this.currentUser = null;
                 this.users = new Map();
                 this.chats = new Map();
-                this.posts = new Map();
-                this.channels = new Map();
-                this.comments = new Map();
-                this.likes = new Map();
+                this.posts = [];
                 this.currentChat = null;
-                this.viewingProfile = null;
-                this.tg = null;
+                this.tg = window.Telegram.WebApp;
+                this.onlineUsers = new Set();
+                this.stickers = this.loadStickers();
+                this.editingField = null;
                 
                 this.init();
             }
 
             init() {
-                this.tg = window.Telegram?.WebApp;
                 if (this.tg) {
                     this.tg.expand();
+                    this.tg.enableClosingConfirmation();
                 }
                 
-                this.loadFromStorage();
+                this.loadData();
                 this.setupEventListeners();
-                this.checkAuth();
-                
-                // Очищаем чаты один раз
-                this.clearTestChats();
+                this.initializeApp();
             }
 
-            clearTestChats() {
-                // Очищаем только тестовые чаты, оставляя структуру
-                const chatKeys = Array.from(this.chats.keys());
-                for (const key of chatKeys) {
-                    if (key.includes('demo') || key.includes('test')) {
-                        this.chats.delete(key);
-                    }
+            loadData() {
+                try {
+                    const savedUsers = localStorage.getItem('quantum_users');
+                    if (savedUsers) this.users = new Map(JSON.parse(savedUsers));
+                } catch (error) {
+                    this.users = new Map();
                 }
-                this.saveToStorage();
+
+                try {
+                    const savedChats = localStorage.getItem('quantum_chats');
+                    if (savedChats) this.chats = new Map(JSON.parse(savedChats));
+                    else this.chats = new Map();
+                } catch (error) {
+                    this.chats = new Map();
+                }
+
+                try {
+                    const savedPosts = localStorage.getItem('quantum_posts');
+                    if (savedPosts) this.posts = JSON.parse(savedPosts);
+                    else this.posts = [];
+                } catch (error) {
+                    this.posts = [];
+                }
+            }
+
+            saveData() {
+                try {
+                    localStorage.setItem('quantum_users', JSON.stringify([...this.users]));
+                    localStorage.setItem('quantum_chats', JSON.stringify([...this.chats]));
+                    localStorage.setItem('quantum_posts', JSON.stringify(this.posts));
+                } catch (error) {
+                    console.log('Error saving data:', error);
+                }
             }
 
             setupEventListeners() {
@@ -1171,29 +1204,38 @@
                     this.searchUsers(e.target.value);
                 });
 
-                document.getElementById('telegram-auth-button').addEventListener('click', () => {
-                    this.handleTelegramAuth();
+                const messageInput = document.getElementById('message-input');
+                messageInput.addEventListener('input', (e) => {
+                    this.autoResizeTextarea(e.target);
+                    this.updateSendButton();
                 });
 
-                document.getElementById('post-image-input').addEventListener('change', (e) => {
-                    this.handlePostImageUpload(e);
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                document.getElementById('avatar-upload').addEventListener('change', (e) => {
+                    this.handleAvatarUpload(e.target.files[0]);
+                });
+
+                document.getElementById('image-upload').addEventListener('change', (e) => {
+                    this.handleImageUpload(e.target.files[0]);
                 });
             }
 
-            checkAuth() {
-                if (this.tg?.initDataUnsafe?.user) {
-                    this.handleTelegramUser(this.tg.initDataUnsafe.user);
+            initializeApp() {
+                const tgUser = this.tg?.initDataUnsafe?.user;
+                if (tgUser) {
+                    this.handleTelegramUser(tgUser);
                 } else {
-                    this.showWelcomeScreen();
+                    this.createDemoUser();
                 }
-            }
 
-            handleTelegramAuth() {
-                if (this.tg?.initDataUnsafe?.user) {
-                    this.handleTelegramUser(this.tg.initDataUnsafe.user);
-                } else {
-                    this.showError('Telegram user data not available');
-                }
+                this.updateAllViews();
+                this.createDemoData();
             }
 
             handleTelegramUser(tgUser) {
@@ -1205,464 +1247,245 @@
                     lastName: tgUser.last_name || '',
                     username: tgUser.username || '',
                     avatar: (tgUser.first_name?.charAt(0) || 'U').toUpperCase(),
-                    avatarUrl: null,
+                    avatarUrl: '',
+                    bio: '',
                     isOnline: true,
-                    lastSeen: new Date().toISOString(),
-                    bio: 'No bio yet',
-                    profileInfo: {
-                        worldview: '',
-                        politics: '',
-                        quote: ''
-                    }
+                    lastSeen: Date.now(),
+                    isVerified: tgUser.username === 'clanffys',
+                    isCreator: tgUser.username === 'clanffys'
                 };
 
-                this.currentUser = userData;
-                this.users.set(userId, userData);
-                this.saveToStorage();
-                this.showMainApp();
-            }
-
-            loadFromStorage() {
-                try {
-                    const savedUsers = localStorage.getItem('quantum_users');
-                    const savedChats = localStorage.getItem('quantum_chats');
-                    const savedPosts = localStorage.getItem('quantum_posts');
-                    const savedChannels = localStorage.getItem('quantum_channels');
-                    const savedComments = localStorage.getItem('quantum_comments');
-                    const savedLikes = localStorage.getItem('quantum_likes');
-                    
-                    if (savedUsers) this.users = new Map(JSON.parse(savedUsers));
-                    if (savedChats) this.chats = new Map(JSON.parse(savedChats));
-                    if (savedPosts) this.posts = new Map(JSON.parse(savedPosts));
-                    if (savedChannels) this.channels = new Map(JSON.parse(savedChannels));
-                    if (savedComments) this.comments = new Map(JSON.parse(savedComments));
-                    if (savedLikes) this.likes = new Map(JSON.parse(savedLikes));
-                } catch (error) {
-                    console.log('Error loading from storage:', error);
+                let existingUser = this.users.get(userId);
+                if (existingUser) {
+                    Object.assign(existingUser, userData);
+                } else {
+                    this.users.set(userId, userData);
                 }
+
+                this.currentUser = this.users.get(userId);
+                this.onlineUsers.add(userId);
+                this.saveData();
             }
 
-            saveToStorage() {
-                try {
-                    localStorage.setItem('quantum_users', JSON.stringify([...this.users]));
-                    localStorage.setItem('quantum_chats', JSON.stringify([...this.chats]));
-                    localStorage.setItem('quantum_posts', JSON.stringify([...this.posts]));
-                    localStorage.setItem('quantum_channels', JSON.stringify([...this.channels]));
-                    localStorage.setItem('quantum_comments', JSON.stringify([...this.comments]));
-                    localStorage.setItem('quantum_likes', JSON.stringify([...this.likes]));
-                } catch (error) {
-                    console.log('Error saving to storage:', error);
-                }
-            }
-
-            showWelcomeScreen() {
-                document.getElementById('welcome-screen').style.display = 'flex';
-                document.getElementById('main-app').style.display = 'none';
-            }
-
-            showMainApp() {
-                document.getElementById('welcome-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'flex';
-                this.updateProfile();
-                this.loadChatsList();
-                this.loadPosts();
-                this.loadChannels();
-            }
-
-            showError(message) {
-                const errorDiv = document.getElementById('error-message');
-                errorDiv.textContent = message;
-                errorDiv.style.display = 'block';
-                setTimeout(() => {
-                    errorDiv.style.display = 'none';
-                }, 5000);
-            }
-
-            switchTab(tabName) {
-                document.querySelectorAll('.tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                
-                event.target.classList.add('active');
-                document.getElementById(`${tabName}-tab`).classList.add('active');
-                
-                const titles = {
-                    'chats': 'Chats',
-                    'channels': 'Channels', 
-                    'profile': 'Profile'
+            createDemoUser() {
+                const demoUser = {
+                    id: 'demo_user',
+                    firstName: 'User',
+                    lastName: '',
+                    username: 'user123',
+                    avatar: 'U',
+                    avatarUrl: '',
+                    bio: 'Welcome to Quantum Messenger!',
+                    isOnline: true,
+                    lastSeen: Date.now(),
+                    isVerified: false,
+                    isCreator: false
                 };
-                document.getElementById('header-title').textContent = titles[tabName];
+                
+                this.users.set('demo_user', demoUser);
+                this.currentUser = demoUser;
+                this.onlineUsers.add('demo_user');
+                this.saveData();
             }
 
-            searchUsers(query) {
-                const chatsContainer = document.getElementById('chats-container');
-                
-                if (!query.trim()) {
-                    this.loadChatsList();
-                    return;
-                }
-
+            createDemoData() {
                 const demoUsers = [
-                    { 
-                        id: 'clanffys', 
-                        firstName: 'Clanffys', 
-                        lastName: '', 
-                        username: 'clanffys', 
-                        avatar: 'C',
+                    {
+                        id: 'user1',
+                        firstName: 'Alex',
+                        lastName: 'Johnson',
+                        username: 'alexj',
+                        avatar: 'A',
+                        avatarUrl: '',
+                        bio: 'Developer and designer',
                         isOnline: true,
-                        bio: 'Тихий омут\nв сети',
-                        isVerified: true
+                        lastSeen: Date.now(),
+                        isVerified: false,
+                        isCreator: false
                     },
-                    { 
-                        id: 'user1', 
-                        firstName: 'John', 
-                        lastName: 'Doe', 
-                        username: 'johndoe', 
-                        avatar: 'J',
+                    {
+                        id: 'user2', 
+                        firstName: 'Sarah',
+                        lastName: 'Miller',
+                        username: 'sarahm',
+                        avatar: 'S',
+                        avatarUrl: '',
+                        bio: 'Love traveling and photography',
                         isOnline: false,
-                        bio: 'Well well well\nсебе'
+                        lastSeen: Date.now() - 3600000,
+                        isVerified: false,
+                        isCreator: false
+                    },
+                    {
+                        id: 'clanffys',
+                        firstName: 'Quantum',
+                        lastName: 'Creator',
+                        username: 'clanffys',
+                        avatar: 'Q',
+                        avatarUrl: '',
+                        bio: 'Creator of Quantum Messenger',
+                        isOnline: true,
+                        lastSeen: Date.now(),
+                        isVerified: true,
+                        isCreator: true
                     }
                 ];
 
-                const searchTerm = query.toLowerCase().replace('@', '');
-                const results = demoUsers.filter(user => 
-                    user.username.toLowerCase().includes(searchTerm) ||
-                    user.firstName.toLowerCase().includes(searchTerm)
-                );
+                demoUsers.forEach(user => {
+                    if (!this.users.has(user.id)) {
+                        this.users.set(user.id, user);
+                    }
+                });
 
-                if (results.length === 0) {
-                    chatsContainer.innerHTML = '<div class="empty-state">No users found</div>';
-                    return;
+                if (this.posts.length === 0) {
+                    const demoPosts = [
+                        {
+                            id: 'post1',
+                            userId: 'clanffys',
+                            content: 'Welcome to Quantum Messenger!\n\nThis is a new messenger with unique features and focus on privacy.',
+                            imageUrl: '',
+                            timestamp: Date.now() - 86400000,
+                            likes: ['user1', 'user2'],
+                            comments: [
+                                {
+                                    id: 'comment1',
+                                    userId: 'user1',
+                                    content: 'Great work! Love the design.',
+                                    timestamp: Date.now() - 86300000
+                                }
+                            ]
+                        }
+                    ];
+
+                    this.posts = demoPosts;
                 }
 
-                chatsContainer.innerHTML = results.map(user => `
-                    <div class="chat-item" onclick="quantum.viewUserProfile('${user.id}')">
-                        <div class="chat-avatar">
-                            ${user.avatar}
-                            <div class="online-status ${user.isOnline ? 'online' : 'offline'}"></div>
-                        </div>
-                        <div class="chat-info">
-                            <div class="chat-name-row">
-                                <div class="chat-name">
-                                    ${user.firstName} ${user.lastName}
-                                    ${user.isVerified ? '<span class="verified-badge"><i class="fas fa-check"></i></span>' : ''}
-                                </div>
-                            </div>
-                            <div class="chat-last-message">@${user.username}</div>
-                        </div>
-                    </div>
-                `).join('');
+                this.saveData();
             }
 
-            loadChatsList() {
-                const chatsContainer = document.getElementById('chats-container');
-                const chatKeys = Array.from(this.chats.keys());
+            switchTab(tabName) {
+                document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
                 
-                if (chatKeys.length === 0) {
-                    chatsContainer.innerHTML = `
+                event.currentTarget.classList.add('active');
+                document.getElementById(`${tabName}-tab`).classList.add('active');
+
+                this.updateTabContent(tabName);
+            }
+
+            updateTabContent(tabName) {
+                switch(tabName) {
+                    case 'home':
+                        this.updatePostsFeed();
+                        break;
+                    case 'chats':
+                        this.updateChatsList();
+                        break;
+                    case 'profile':
+                        this.updateProfile();
+                        break;
+                }
+            }
+
+            updateAllViews() {
+                this.updatePostsFeed();
+                this.updateChatsList();
+                this.updateProfile();
+                this.updateSettings();
+            }
+
+            updatePostsFeed() {
+                const feed = document.getElementById('posts-feed');
+                if (this.posts.length === 0) {
+                    feed.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-title">No chats yet</div>
-                            <div class="empty-subtitle">Search for users to start chatting</div>
+                            <div class="empty-title">No posts yet</div>
+                            <div class="empty-subtitle">Be the first to share something!</div>
                         </div>
                     `;
                     return;
                 }
 
-                let chatsHTML = '';
+                const sortedPosts = [...this.posts].sort((a, b) => b.timestamp - a.timestamp);
                 
-                for (const chatKey of chatKeys) {
-                    const [user1, user2] = chatKey.split('_');
-                    const otherUserId = user1 === this.currentUser.id ? user2 : user1;
-                    const otherUser = this.users.get(otherUserId);
-                    
-                    if (otherUser) {
-                        const messages = this.chats.get(chatKey) || [];
-                        const lastMessage = messages[messages.length - 1];
-                        
-                        chatsHTML += `
-                            <div class="chat-item" onclick="quantum.openChat('${otherUserId}')">
-                                <div class="chat-avatar">
-                                    ${otherUser.avatar}
-                                    <div class="online-status ${otherUser.isOnline ? 'online' : 'offline'}"></div>
-                                </div>
-                                <div class="chat-info">
-                                    <div class="chat-name-row">
-                                        <div class="chat-name">
-                                            ${otherUser.firstName} ${otherUser.lastName}
-                                            ${otherUser.username === 'clanffys' ? '<span class="verified-badge"><i class="fas fa-check"></i></span>' : ''}
-                                        </div>
-                                        <div class="chat-time">${lastMessage ? this.formatTime(lastMessage.timestamp) : ''}</div>
-                                    </div>
-                                    <div class="chat-last-message">${lastMessage ? (lastMessage.isSticker ? 'Sticker' : lastMessage.text) : 'No messages yet'}</div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-                
-                chatsContainer.innerHTML = chatsHTML;
-            }
+                feed.innerHTML = sortedPosts.map(post => {
+                    const user = this.users.get(post.userId);
+                    if (!user) return '';
 
-            loadChannels() {
-                const channelsContainer = document.getElementById('channels-container');
-                const channels = Array.from(this.channels.values());
-                
-                if (channels.length === 0) {
-                    channelsContainer.innerHTML = '<div class="empty-state">No channels yet</div>';
-                    return;
-                }
-
-                channelsContainer.innerHTML = channels.map(channel => `
-                    <div class="channel-item" onclick="quantum.openChannel('${channel.id}')">
-                        <div class="channel-avatar">${channel.name.charAt(0)}</div>
-                        <div class="channel-info">
-                            <div class="channel-name">${channel.name}</div>
-                            <div class="channel-subscribers">${channel.subscribers || 0} subscribers</div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            openCreateChannelModal() {
-                document.getElementById('create-channel-modal').classList.add('active');
-            }
-
-            closeCreateChannelModal() {
-                document.getElementById('create-channel-modal').classList.remove('active');
-                document.getElementById('channel-name').value = '';
-                document.getElementById('channel-description').value = '';
-            }
-
-            createChannel() {
-                const name = document.getElementById('channel-name').value.trim();
-                const description = document.getElementById('channel-description').value.trim();
-                
-                if (!name) return;
-
-                const channel = {
-                    id: Date.now().toString(),
-                    name: name,
-                    description: description,
-                    ownerId: this.currentUser.id,
-                    created: new Date().toISOString(),
-                    subscribers: 1
-                };
-
-                this.channels.set(channel.id, channel);
-                this.saveToStorage();
-                this.closeCreateChannelModal();
-                this.loadChannels();
-            }
-
-            openChannel(channelId) {
-                // Здесь можно реализовать просмотр канала
-                alert(`Opening channel ${channelId}`);
-            }
-
-            openSettings() {
-                document.getElementById('main-app').style.display = 'none';
-                document.getElementById('settings-screen').style.display = 'flex';
-            }
-
-            closeSettings() {
-                document.getElementById('settings-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'flex';
-            }
-
-            openEditProfile() {
-                document.getElementById('edit-firstname').value = this.currentUser.firstName;
-                document.getElementById('edit-lastname').value = this.currentUser.lastName;
-                document.getElementById('edit-bio').value = this.currentUser.bio;
-                document.getElementById('edit-worldview').value = this.currentUser.profileInfo.worldview;
-                document.getElementById('edit-politics').value = this.currentUser.profileInfo.politics;
-                document.getElementById('edit-quote').value = this.currentUser.profileInfo.quote;
-                document.getElementById('edit-profile-modal').classList.add('active');
-            }
-
-            closeEditProfile() {
-                document.getElementById('edit-profile-modal').classList.remove('active');
-            }
-
-            openUsernameSettings() {
-                document.getElementById('username-input').value = this.currentUser.username;
-                document.getElementById('username-modal').classList.add('active');
-            }
-
-            closeUsernameSettings() {
-                document.getElementById('username-modal').classList.remove('active');
-            }
-
-            saveProfile() {
-                this.currentUser.firstName = document.getElementById('edit-firstname').value;
-                this.currentUser.lastName = document.getElementById('edit-lastname').value;
-                this.currentUser.bio = document.getElementById('edit-bio').value;
-                this.currentUser.profileInfo = {
-                    worldview: document.getElementById('edit-worldview').value,
-                    politics: document.getElementById('edit-politics').value,
-                    quote: document.getElementById('edit-quote').value
-                };
-                
-                this.users.set(this.currentUser.id, this.currentUser);
-                this.saveToStorage();
-                this.updateProfile();
-                this.closeEditProfile();
-            }
-
-            saveUsername() {
-                const username = document.getElementById('username-input').value.trim();
-                if (username) {
-                    this.currentUser.username = username;
-                    this.users.set(this.currentUser.id, this.currentUser);
-                    this.saveToStorage();
-                    this.updateProfile();
-                    this.closeUsernameSettings();
-                }
-            }
-
-            updateProfile() {
-                if (!this.currentUser) return;
-
-                const avatarElement = document.getElementById('profile-avatar-large');
-                avatarElement.textContent = this.currentUser.avatarUrl ? '' : this.currentUser.avatar;
-                avatarElement.style.backgroundImage = this.currentUser.avatarUrl ? `url(${this.currentUser.avatarUrl})` : '';
-                
-                document.getElementById('profile-name').textContent = `${this.currentUser.firstName} ${this.currentUser.lastName}`;
-                document.getElementById('profile-username').textContent = this.currentUser.username ? `@${this.currentUser.username}` : 'No username';
-                document.getElementById('profile-bio').textContent = this.currentUser.bio || 'No bio yet';
-                document.getElementById('profile-bio').innerHTML = this.currentUser.bio ? this.currentUser.bio.replace(/\n/g, '<br>') : 'No bio yet';
-            }
-
-            openCreatePostModal() {
-                document.getElementById('create-post-modal').classList.add('active');
-            }
-
-            closeCreatePostModal() {
-                document.getElementById('create-post-modal').classList.remove('active');
-                document.getElementById('post-text').value = '';
-                document.getElementById('post-image-preview').style.display = 'none';
-                document.getElementById('post-image-preview').src = '';
-            }
-
-            handlePostImageUpload(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const preview = document.getElementById('post-image-preview');
-                        preview.src = event.target.result;
-                        preview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            }
-
-            createPost() {
-                const text = document.getElementById('post-text').value.trim();
-                const imagePreview = document.getElementById('post-image-preview');
-                const imageSrc = imagePreview.style.display !== 'none' ? imagePreview.src : null;
-
-                if (!text && !imageSrc) return;
-
-                const postId = Date.now().toString();
-                const post = {
-                    id: postId,
-                    authorId: this.currentUser.id,
-                    text: text,
-                    image: imageSrc,
-                    timestamp: new Date().toISOString()
-                };
-
-                if (!this.posts.has(this.currentUser.id)) {
-                    this.posts.set(this.currentUser.id, []);
-                }
-
-                const userPosts = this.posts.get(this.currentUser.id);
-                userPosts.unshift(post);
-                this.posts.set(this.currentUser.id, userPosts);
-                
-                if (!this.likes.has(postId)) {
-                    this.likes.set(postId, new Set());
-                }
-                if (!this.comments.has(postId)) {
-                    this.comments.set(postId, []);
-                }
-                
-                this.saveToStorage();
-                this.closeCreatePostModal();
-                this.loadPosts();
-            }
-
-            loadPosts(userId = null) {
-                const targetUserId = userId || this.currentUser.id;
-                const postsContainer = document.getElementById('posts-container');
-
-                if (!this.posts.has(targetUserId) || this.posts.get(targetUserId).length === 0) {
-                    postsContainer.innerHTML = '<div class="empty-state">No posts yet</div>';
-                    return;
-                }
-
-                const userPosts = this.posts.get(targetUserId);
-                const user = this.users.get(targetUserId);
-
-                postsContainer.innerHTML = userPosts.map(post => {
-                    const postLikes = this.likes.get(post.id) || new Set();
-                    const postComments = this.comments.get(post.id) || [];
-                    const isLiked = postLikes.has(this.currentUser.id);
-                    const likeCount = postLikes.size;
-                    const commentCount = postComments.length;
+                    const isLiked = post.likes.includes(this.currentUser.id);
+                    const timeAgo = this.getTimeAgo(post.timestamp);
 
                     return `
-                        <div class="post">
+                        <div class="post" data-post-id="${post.id}">
                             <div class="post-header">
-                                <div class="post-avatar">${user.avatar}</div>
-                                <div class="post-author">
-                                    <div class="post-author-name">
+                                <div class="post-avatar" style="${user.avatarUrl ? `background-image: url(${user.avatarUrl})` : ''}">
+                                    ${user.avatarUrl ? '' : user.avatar}
+                                </div>
+                                <div class="post-user-info">
+                                    <div class="post-username">
                                         ${user.firstName} ${user.lastName}
-                                        ${user.username === 'clanffys' ? '<span class="verified-badge"><i class="fas fa-check"></i></span>' : ''}
+                                        ${user.isVerified ? '<span class="verified-badge"><i class="fas fa-check-circle"></i></span>' : ''}
                                     </div>
-                                    <div class="post-time">${this.formatTime(post.timestamp)}</div>
+                                    <div class="post-time">${timeAgo}</div>
                                 </div>
                             </div>
-                            ${post.text ? `<div class="post-content">${post.text}</div>` : ''}
-                            ${post.image ? `<img src="${post.image}" class="post-image" alt="Post image">` : ''}
-                            
-                            <div class="post-stats">
-                                <span>${likeCount} likes</span>
-                                <span>${commentCount} comments</span>
+                            <div class="post-content">
+                                ${post.content.replace(/\n/g, '<br>')}
+                                ${post.imageUrl ? `<img src="${post.imageUrl}" class="post-image" onclick="messenger.openImageViewer('${post.imageUrl}')">` : ''}
                             </div>
-                            
                             <div class="post-actions">
-                                <button class="post-action ${isLiked ? 'active' : ''}" onclick="quantum.toggleLike('${post.id}')">
-                                    <i class="fas fa-heart"></i> Like
-                                </button>
-                                <button class="post-action" onclick="quantum.toggleComments('${post.id}')">
-                                    <i class="fas fa-comment"></i> Comment
-                                </button>
-                                ${!userId ? `<button class="post-action delete-post" onclick="quantum.deletePost('${post.id}')">
-                                    <i class="fas fa-trash"></i> Delete
-                                </button>` : ''}
+                                <div class="post-action like ${isLiked ? 'active' : ''}" onclick="messenger.toggleLike('${post.id}')">
+                                    <i class="fas fa-heart"></i>
+                                    <span>${post.likes.length}</span>
+                                </div>
+                                <div class="post-action comment" onclick="messenger.toggleComments('${post.id}')">
+                                    <i class="fas fa-comment"></i>
+                                    <span>${post.comments.length}</span>
+                                </div>
                             </div>
-                            
-                            <div class="comments-section" id="comments-${post.id}" style="display: none;">
-                                ${postComments.map((comment, index) => `
-                                    <div class="comment">
-                                        <div class="comment-avatar">${comment.author.charAt(0)}</div>
-                                        <div class="comment-content">
-                                            <div class="comment-author">${comment.author}</div>
-                                            <div>${comment.text}</div>
-                                            ${(userId === this.currentUser.id || comment.author === `${this.currentUser.firstName} ${this.currentUser.lastName}`) ? 
-                                                `<div class="delete-comment" onclick="quantum.deleteComment('${post.id}', ${index})">
-                                                    <i class="fas fa-times"></i>
-                                                </div>` : ''}
-                                        </div>
+                            <div class="comments-section" id="comments-${post.id}">
+                                ${this.renderComments(post.comments)}
+                                <div class="add-comment">
+                                    <input type="text" class="comment-input" id="comment-input-${post.id}" placeholder="Write a comment...">
+                                    <button class="send-comment" onclick="messenger.addComment('${post.id}')">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            renderComments(comments) {
+                if (comments.length === 0) return '';
+
+                return comments.map(comment => {
+                    const user = this.users.get(comment.userId);
+                    if (!user) return '';
+
+                    const timeAgo = this.getTimeAgo(comment.timestamp);
+                    const canDelete = comment.userId === this.currentUser.id;
+
+                    return `
+                        <div class="comment" data-comment-id="${comment.id}">
+                            <div class="comment-avatar" style="${user.avatarUrl ? `background-image: url(${user.avatarUrl})` : ''}">
+                                ${user.avatarUrl ? '' : user.avatar}
+                            </div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <div class="comment-username">
+                                        ${user.firstName} ${user.lastName}
+                                        ${user.isVerified ? '<span class="verified-badge"><i class="fas fa-check-circle"></i></span>' : ''}
                                     </div>
-                                `).join('')}
-                                <input type="text" class="comment-input" placeholder="Write a comment..." 
-                                       onkeypress="if(event.key==='Enter') quantum.addComment('${post.id}', this)">
+                                    <div class="comment-time">${timeAgo}</div>
+                                </div>
+                                <div class="comment-text">${comment.content}</div>
+                                ${canDelete ? `
+                                    <div class="comment-actions">
+                                        <div class="comment-action" onclick="messenger.deleteComment('${comment.id}')">Delete</div>
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                     `;
@@ -1670,88 +1493,749 @@
             }
 
             toggleLike(postId) {
-                if (!this.likes.has(postId)) {
-                    this.likes.set(postId, new Set());
-                }
-                
-                const postLikes = this.likes.get(postId);
-                if (postLikes.has(this.currentUser.id)) {
-                    postLikes.delete(this.currentUser.id);
+                const post = this.posts.find(p => p.id === postId);
+                if (!post) return;
+
+                const likeIndex = post.likes.indexOf(this.currentUser.id);
+                if (likeIndex > -1) {
+                    post.likes.splice(likeIndex, 1);
                 } else {
-                    postLikes.add(this.currentUser.id);
+                    post.likes.push(this.currentUser.id);
                 }
-                
-                this.saveToStorage();
-                this.loadPosts(this.viewingProfile || this.currentUser.id);
+
+                this.saveData();
+                this.updatePostsFeed();
             }
 
             toggleComments(postId) {
                 const commentsSection = document.getElementById(`comments-${postId}`);
-                commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+                if (commentsSection) {
+                    commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+                }
             }
 
-            addComment(postId, input) {
-                const text = input.value.trim();
-                if (!text) return;
+            addComment(postId) {
+                const input = document.getElementById(`comment-input-${postId}`);
+                const content = input.value.trim();
+                if (!content) return;
 
-                if (!this.comments.has(postId)) {
-                    this.comments.set(postId, []);
+                const post = this.posts.find(p => p.id === postId);
+                if (!post) return;
+
+                const newComment = {
+                    id: `comment_${Date.now()}`,
+                    userId: this.currentUser.id,
+                    content: content,
+                    timestamp: Date.now(),
+                    postId: postId
+                };
+
+                post.comments.push(newComment);
+                this.saveData();
+                
+                input.value = '';
+                this.updatePostsFeed();
+            }
+
+            deleteComment(commentId) {
+                for (const post of this.posts) {
+                    const commentIndex = post.comments.findIndex(c => c.id === commentId);
+                    if (commentIndex > -1) {
+                        post.comments.splice(commentIndex, 1);
+                        this.saveData();
+                        this.updatePostsFeed();
+                        break;
+                    }
                 }
+            }
 
-                const postComments = this.comments.get(postId);
-                postComments.push({
-                    author: `${this.currentUser.firstName} ${this.currentUser.lastName}`,
-                    text: text,
-                    timestamp: new Date().toISOString()
+            createNewPost() {
+                document.getElementById('post-modal').style.display = 'flex';
+            }
+
+            publishPost() {
+                const content = document.getElementById('post-content').value.trim();
+                if (!content) return;
+
+                const newPost = {
+                    id: `post_${Date.now()}`,
+                    userId: this.currentUser.id,
+                    content: content,
+                    imageUrl: '',
+                    timestamp: Date.now(),
+                    likes: [],
+                    comments: []
+                };
+
+                this.posts.push(newPost);
+                this.saveData();
+                this.closePostModal();
+                this.updatePostsFeed();
+                this.updateProfile();
+            }
+
+            closePostModal() {
+                document.getElementById('post-modal').style.display = 'none';
+                document.getElementById('post-content').value = '';
+            }
+
+            updateChatsList() {
+                const container = document.getElementById('chats-container');
+                const chatPartners = new Set();
+                
+                this.chats.forEach((messages, chatKey) => {
+                    const [user1, user2] = chatKey.split('_');
+                    if (user1 === this.currentUser.id) chatPartners.add(user2);
+                    else if (user2 === this.currentUser.id) chatPartners.add(user1);
                 });
 
-                this.saveToStorage();
-                input.value = '';
-                this.loadPosts(this.viewingProfile || this.currentUser.id);
-                
-                const commentsSection = document.getElementById(`comments-${postId}`);
-                commentsSection.style.display = 'block';
+                if (chatPartners.size === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-title">No chats</div>
+                            <div class="empty-subtitle">Find users to start chatting</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const chatItems = Array.from(chatPartners).map(userId => {
+                    const user = this.users.get(userId);
+                    if (!user) return '';
+                    
+                    const chatKey = this.getChatKey(this.currentUser.id, userId);
+                    const messages = this.chats.get(chatKey) || [];
+                    const lastMessage = messages[messages.length - 1];
+                    
+                    let lastMessageText = 'No messages';
+                    if (lastMessage) {
+                        if (lastMessage.imageUrl) lastMessageText = 'Photo';
+                        else if (lastMessage.stickerUrl) lastMessageText = 'Sticker';
+                        else lastMessageText = lastMessage.text;
+                    }
+
+                    return `
+                        <div class="chat-item" onclick="messenger.openChat('${userId}')">
+                            <div class="chat-avatar" style="${user.avatarUrl ? `background-image: url(${user.avatarUrl})` : ''}">
+                                ${user.avatarUrl ? '' : user.avatar}
+                                <div class="online-status ${user.isOnline ? 'online' : 'offline'}"></div>
+                            </div>
+                            <div class="chat-info">
+                                <div class="chat-name">
+                                    ${user.firstName} ${user.lastName}
+                                    ${user.isVerified ? '<span class="verified-badge"><i class="fas fa-check-circle"></i></span>' : ''}
+                                </div>
+                                ${user.username ? `<div class="chat-username">@${user.username}</div>` : ''}
+                                <div class="chat-last-message">${lastMessageText}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = chatItems;
             }
 
-            deleteComment(postId, commentIndex) {
-                if (!this.comments.has(postId)) return;
-
-                const postComments = this.comments.get(postId);
-                postComments.splice(commentIndex, 1);
-                this.comments.set(postId, postComments);
+            searchUsers(query) {
+                const container = document.getElementById('chats-container');
                 
-                this.saveToStorage();
-                this.loadPosts(this.viewingProfile || this.currentUser.id);
+                if (!query) {
+                    this.updateChatsList();
+                    return;
+                }
+
+                const searchTerm = query.toLowerCase();
+                const results = Array.from(this.users.entries())
+                    .filter(([id, user]) => {
+                        if (id === this.currentUser.id) return false;
+                        const nameMatch = user.firstName.toLowerCase().includes(searchTerm) ||
+                                         user.lastName.toLowerCase().includes(searchTerm);
+                        const usernameMatch = user.username && user.username.toLowerCase().includes(searchTerm);
+                        return nameMatch || usernameMatch;
+                    })
+                    .slice(0, 10);
+
+                if (results.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-title">No users found</div>
+                            <div class="empty-subtitle">Try a different search term</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = results.map(([id, user]) => `
+                    <div class="chat-item" onclick="messenger.openChat('${id}')">
+                        <div class="chat-avatar" style="${user.avatarUrl ? `background-image: url(${user.avatarUrl})` : ''}">
+                            ${user.avatarUrl ? '' : user.avatar}
+                            <div class="online-status ${user.isOnline ? 'online' : 'offline'}"></div>
+                        </div>
+                        <div class="chat-info">
+                            <div class="chat-name">
+                                ${user.firstName} ${user.lastName}
+                                ${user.isVerified ? '<span class="verified-badge"><i class="fas fa-check-circle"></i></span>' : ''}
+                            </div>
+                            ${user.username ? `<div class="chat-username">@${user.username}</div>` : ''}
+                            <div class="chat-last-message">${user.isOnline ? 'Online' : 'Offline'}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            openChat(userId) {
+                if (!this.users.has(userId) || !this.currentUser) return;
+
+                const user = this.users.get(userId);
+                this.currentChat = userId;
+
+                const chatKey = this.getChatKey(this.currentUser.id, userId);
+                if (!this.chats.has(chatKey)) {
+                    this.chats.set(chatKey, []);
+                }
+
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('chat-window').style.display = 'flex';
+
+                this.updateChatHeader();
+                this.updateChatWindow();
+
+                setTimeout(() => {
+                    document.getElementById('message-input').focus();
+                }, 300);
+            }
+
+            closeChat() {
+                document.getElementById('chat-window').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                this.currentChat = null;
+                
+                document.getElementById('message-input').value = '';
+                this.autoResizeTextarea(document.getElementById('message-input'));
+                this.updateSendButton();
+                this.hideStickerPicker();
+                
+                this.updateChatsList();
+            }
+
+            updateChatHeader() {
+                if (!this.currentChat) return;
+
+                const user = this.users.get(this.currentChat);
+                if (!user) return;
+
+                const avatarElement = document.getElementById('chat-header-avatar');
+                const nameElement = document.getElementById('chat-header-name');
+                const statusElement = document.getElementById('chat-header-status');
+                const onlineStatusElement = document.getElementById('chat-online-status');
+                const verifiedBadge = document.getElementById('chat-verified-badge');
+
+                if (user.avatarUrl) {
+                    avatarElement.style.backgroundImage = `url(${user.avatarUrl})`;
+                    avatarElement.innerHTML = '';
+                } else {
+                    avatarElement.style.backgroundImage = '';
+                    avatarElement.innerHTML = user.avatar;
+                }
+
+                nameElement.textContent = `${user.firstName} ${user.lastName}`.trim();
+                verifiedBadge.style.display = user.isVerified ? 'inline' : 'none';
+
+                if (user.isOnline) {
+                    statusElement.textContent = 'Online';
+                    onlineStatusElement.className = 'online-status online';
+                } else {
+                    const lastSeen = new Date(user.lastSeen);
+                    const now = new Date();
+                    const diffMinutes = Math.floor((now - lastSeen) / 60000);
+                    
+                    if (diffMinutes < 1) statusElement.textContent = 'last seen just now';
+                    else if (diffMinutes < 60) statusElement.textContent = `last seen ${diffMinutes} min ago`;
+                    else statusElement.textContent = `last seen ${Math.floor(diffMinutes / 60)} hours ago`;
+                    onlineStatusElement.className = 'online-status offline';
+                }
+            }
+
+            updateChatWindow() {
+                if (!this.currentChat || !this.currentUser) return;
+
+                const container = document.getElementById('messages-container');
+                const chatKey = this.getChatKey(this.currentUser.id, this.currentChat);
+                const messages = this.chats.get(chatKey) || [];
+
+                if (messages.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-title">No messages</div>
+                            <div class="empty-subtitle">Send a message to start conversation</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = messages.map(message => {
+                    const isOutgoing = message.senderId === this.currentUser.id;
+                    const time = new Date(message.timestamp).toLocaleTimeString([], { 
+                        hour: '2-digit', minute: '2-digit' 
+                    });
+
+                    let content = '';
+                    if (message.text) {
+                        content = `<div class="message-text">${this.escapeHtml(message.text)}</div>`;
+                    } else if (message.imageUrl) {
+                        content = `<img src="${message.imageUrl}" class="message-image" onclick="messenger.openImageViewer('${message.imageUrl}')">`;
+                    } else if (message.stickerUrl) {
+                        content = `<img src="${message.stickerUrl}" class="message-sticker">`;
+                    }
+
+                    return `
+                        <div class="message ${isOutgoing ? 'outgoing' : 'incoming'}">
+                            ${content}
+                            <div class="message-time">${time}</div>
+                        </div>
+                    `;
+                }).join('');
+
+                container.scrollTop = container.scrollHeight;
+            }
+
+            sendMessage() {
+                if (!this.currentChat || !this.currentUser) return;
+
+                const input = document.getElementById('message-input');
+                const text = input.value.trim();
+
+                if (!text) return;
+
+                const chatKey = this.getChatKey(this.currentUser.id, this.currentChat);
+                const messages = this.chats.get(chatKey) || [];
+
+                const newMessage = {
+                    id: Date.now().toString(),
+                    senderId: this.currentUser.id,
+                    text: text,
+                    timestamp: Date.now(),
+                    imageUrl: null,
+                    stickerUrl: null
+                };
+
+                messages.push(newMessage);
+                this.chats.set(chatKey, messages);
+                this.saveData();
+
+                input.value = '';
+                this.autoResizeTextarea(input);
+                this.updateSendButton();
+
+                this.updateChatWindow();
+                this.updateChatsList();
+            }
+
+            sendSticker(stickerUrl) {
+                if (!this.currentChat || !this.currentUser) return;
+
+                const chatKey = this.getChatKey(this.currentUser.id, this.currentChat);
+                const messages = this.chats.get(chatKey) || [];
+
+                const newMessage = {
+                    id: Date.now().toString(),
+                    senderId: this.currentUser.id,
+                    text: '',
+                    timestamp: Date.now(),
+                    imageUrl: null,
+                    stickerUrl: stickerUrl
+                };
+
+                messages.push(newMessage);
+                this.chats.set(chatKey, messages);
+                this.saveData();
+
+                this.hideStickerPicker();
+                this.updateChatWindow();
+                this.updateChatsList();
+            }
+
+            handleImageUpload(file) {
+                if (!file || !this.currentChat || !this.currentUser) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageUrl = e.target.result;
+                    const chatKey = this.getChatKey(this.currentUser.id, this.currentChat);
+                    const messages = this.chats.get(chatKey) || [];
+
+                    const newMessage = {
+                        id: Date.now().toString(),
+                        senderId: this.currentUser.id,
+                        text: '',
+                        timestamp: Date.now(),
+                        imageUrl: imageUrl,
+                        stickerUrl: null
+                    };
+
+                    messages.push(newMessage);
+                    this.chats.set(chatKey, messages);
+                    this.saveData();
+
+                    this.updateChatWindow();
+                    this.updateChatsList();
+
+                    document.getElementById('image-upload').value = '';
+                };
+
+                reader.readAsDataURL(file);
+            }
+
+            handleAvatarUpload(file) {
+                if (!file || !this.currentUser) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.currentUser.avatarUrl = e.target.result;
+                    this.saveData();
+                    
+                    const avatarLarge = document.getElementById('profile-avatar-large');
+                    avatarLarge.style.backgroundImage = `url(${this.currentUser.avatarUrl})`;
+                    avatarLarge.innerHTML = '';
+                    
+                    this.updateAllViews();
+                };
+
+                reader.readAsDataURL(file);
+            }
+
+            updateProfile() {
+                if (!this.currentUser) return;
+
+                const displayName = document.getElementById('profile-display-name');
+                const username = document.getElementById('profile-username');
+                const bio = document.getElementById('profile-bio');
+                const verifiedBadge = document.getElementById('profile-verified-badge');
+                const creatorBadge = document.getElementById('creator-badge');
+                const avatarLarge = document.getElementById('profile-avatar-large');
+                const postsCount = document.getElementById('stat-posts');
+
+                displayName.textContent = `${this.currentUser.firstName} ${this.currentUser.lastName}`.trim();
+                username.textContent = `@${this.currentUser.username}`;
+                bio.textContent = this.currentUser.bio || 'No bio yet';
+                
+                verifiedBadge.style.display = this.currentUser.isVerified ? 'inline' : 'none';
+                creatorBadge.style.display = this.currentUser.isCreator ? 'inline-block' : 'none';
+
+                if (this.currentUser.avatarUrl) {
+                    avatarLarge.style.backgroundImage = `url(${this.currentUser.avatarUrl})`;
+                    avatarLarge.innerHTML = '';
+                } else {
+                    avatarLarge.style.backgroundImage = '';
+                    avatarLarge.innerHTML = '<i class="fas fa-user" id="profile-avatar-icon"></i>';
+                }
+
+                const userPosts = this.posts.filter(post => post.userId === this.currentUser.id);
+                postsCount.textContent = userPosts.length;
+
+                this.updateProfilePosts();
+            }
+
+            updateProfilePosts() {
+                const container = document.getElementById('profile-posts-container');
+                const userPosts = this.posts.filter(post => post.userId === this.currentUser.id);
+
+                if (userPosts.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-title">No posts yet</div>
+                            <div class="empty-subtitle">Create your first post to share with the world!</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = userPosts.map(post => {
+                    const timeAgo = this.getTimeAgo(post.timestamp);
+                    const isLiked = post.likes.includes(this.currentUser.id);
+
+                    return `
+                        <div class="post" data-post-id="${post.id}">
+                            <div class="post-header">
+                                <div class="post-user-info">
+                                    <div class="post-time">${timeAgo}</div>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                ${post.content.replace(/\n/g, '<br>')}
+                                ${post.imageUrl ? `<img src="${post.imageUrl}" class="post-image" onclick="messenger.openImageViewer('${post.imageUrl}')">` : ''}
+                            </div>
+                            <div class="post-actions">
+                                <div class="post-action like ${isLiked ? 'active' : ''}" onclick="messenger.toggleLike('${post.id}')">
+                                    <i class="fas fa-heart"></i>
+                                    <span>${post.likes.length}</span>
+                                </div>
+                                <div class="post-action comment" onclick="messenger.toggleComments('${post.id}')">
+                                    <i class="fas fa-comment"></i>
+                                    <span>${post.comments.length}</span>
+                                </div>
+                                <div class="post-action" onclick="messenger.deletePost('${post.id}')" style="margin-left: auto;">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             }
 
             deletePost(postId) {
-                if (!this.posts.has(this.currentUser.id)) return;
+                if (!confirm('Delete this post?')) return;
 
-                const userPosts = this.posts.get(this.currentUser.id);
-                const updatedPosts = userPosts.filter(post => post.id !== postId);
-                this.posts.set(this.currentUser.id, updatedPosts);
-                
-                this.likes.delete(postId);
-                this.comments.delete(postId);
-                
-                this.saveToStorage();
-                this.loadPosts();
+                const postIndex = this.posts.findIndex(p => p.id === postId);
+                if (postIndex > -1 && this.posts[postIndex].userId === this.currentUser.id) {
+                    this.posts.splice(postIndex, 1);
+                    this.saveData();
+                    this.updatePostsFeed();
+                    this.updateProfile();
+                }
             }
 
-            formatTime(dateString) {
-                const date = new Date(dateString);
-                const now = new Date();
-                const diff = now - date;
+            updateSettings() {
+                if (!this.currentUser) return;
+
+                document.getElementById('current-name').textContent = `${this.currentUser.firstName} ${this.currentUser.lastName}`.trim();
+                document.getElementById('current-username').textContent = `@${this.currentUser.username}`;
+                document.getElementById('current-bio').textContent = this.currentUser.bio || 'Not set';
+            }
+
+            openEditModal(field) {
+                this.editingField = field;
+                const modal = document.getElementById('edit-modal');
+                const title = document.getElementById('modal-title');
+                const input = document.getElementById('modal-input');
+
+                let currentValue = '';
+                let placeholder = '';
+
+                switch(field) {
+                    case 'name':
+                        title.textContent = 'Edit Name';
+                        currentValue = `${this.currentUser.firstName} ${this.currentUser.lastName}`.trim();
+                        placeholder = 'Enter name';
+                        break;
+                    case 'username':
+                        title.textContent = 'Edit Username';
+                        currentValue = this.currentUser.username;
+                        placeholder = 'Enter username (5-15 characters)';
+                        break;
+                    case 'bio':
+                        title.textContent = 'Edit Bio';
+                        currentValue = this.currentUser.bio;
+                        placeholder = 'Enter bio (max 40 characters)';
+                        break;
+                }
+
+                input.value = currentValue;
+                input.placeholder = placeholder;
+                modal.style.display = 'flex';
+                input.focus();
+            }
+
+            saveModal() {
+                const input = document.getElementById('modal-input');
+                const value = input.value.trim();
+
+                if (!value) return;
+
+                switch(this.editingField) {
+                    case 'name':
+                        const names = value.split(' ');
+                        this.currentUser.firstName = names[0] || '';
+                        this.currentUser.lastName = names.slice(1).join(' ') || '';
+                        break;
+                    case 'username':
+                        if (value.length < 5 || value.length > 15) {
+                            alert('Username must be 5-15 characters');
+                            return;
+                        }
+                        if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+                            alert('Username can only contain letters, numbers and underscore');
+                            return;
+                        }
+                        this.currentUser.username = value;
+                        break;
+                    case 'bio':
+                        if (value.length > 40) {
+                            alert('Bio cannot be longer than 40 characters');
+                            return;
+                        }
+                        this.currentUser.bio = value;
+                        break;
+                }
+
+                this.saveData();
+                this.closeModal();
+                this.updateAllViews();
+            }
+
+            closeModal() {
+                document.getElementById('edit-modal').style.display = 'none';
+                this.editingField = null;
+            }
+
+            changeAvatar() {
+                document.getElementById('avatar-upload').click();
+            }
+
+            loadStickers() {
+                return [
+                    'https://via.placeholder.com/120x120/2ea6ff/ffffff?text=ST1',
+                    'https://via.placeholder.com/120x120/bf5af2/ffffff?text=ST2',
+                    'https://via.placeholder.com/120x120/34c759/ffffff?text=ST3',
+                    'https://via.placeholder.com/120x120/ff453a/ffffff?text=ST4',
+                    'https://via.placeholder.com/120x120/ffd60a/000000?text=ST5'
+                ];
+            }
+
+            toggleStickerPicker() {
+                const picker = document.getElementById('sticker-picker');
+                if (picker.style.display === 'flex') {
+                    this.hideStickerPicker();
+                } else {
+                    this.showStickerPicker();
+                }
+            }
+
+            showStickerPicker() {
+                const picker = document.getElementById('sticker-picker');
+                picker.innerHTML = this.stickers.map((stickerUrl, index) => `
+                    <img src="${stickerUrl}" class="sticker-item" onclick="messenger.sendSticker('${stickerUrl}')" alt="Sticker ${index + 1}">
+                `).join('');
+                picker.style.display = 'flex';
+            }
+
+            hideStickerPicker() {
+                document.getElementById('sticker-picker').style.display = 'none';
+            }
+
+            autoResizeTextarea(textarea) {
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+            }
+
+            updateSendButton() {
+                const input = document.getElementById('message-input');
+                const button = document.getElementById('send-button');
+                button.disabled = input.value.trim().length === 0;
+            }
+
+            getChatKey(user1, user2) {
+                return [user1, user2].sort().join('_');
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            getTimeAgo(timestamp) {
+                const now = Date.now();
+                const diff = now - timestamp;
                 
-                if (diff < 60 * 1000) return 'now';
-                else if (diff < 60 * 60 * 1000) return Math.floor(diff / (60 * 1000)) + 'm';
-                else if (diff < 24 * 60 * 60 * 1000) return Math.floor(diff / (60 * 60 * 1000)) + 'h';
-                else return date.toLocaleDateString();
+                const minutes = Math.floor(diff / 60000);
+                const hours = Math.floor(diff / 3600000);
+                const days = Math.floor(diff / 86400000);
+                
+                if (minutes < 1) return 'just now';
+                if (minutes < 60) return `${minutes}m ago`;
+                if (hours < 24) return `${hours}h ago`;
+                if (days < 7) return `${days}d ago`;
+                
+                return new Date(timestamp).toLocaleDateString();
+            }
+
+            openImageViewer(imageUrl) {
+                document.getElementById('viewer-image').src = imageUrl;
+                document.getElementById('image-viewer').style.display = 'flex';
+            }
+
+            closeImageViewer() {
+                document.getElementById('image-viewer').style.display = 'none';
+            }
+
+            updateOnlineStatus() {
+                this.users.forEach((user, userId) => {
+                    if (userId !== this.currentUser.id) {
+                        if (Math.random() > 0.7) {
+                            user.isOnline = !user.isOnline;
+                            user.lastSeen = Date.now();
+                        }
+                    }
+                });
+                
+                if (this.currentChat) {
+                    this.updateChatHeader();
+                }
+                this.updateChatsList();
             }
         }
 
-        // Инициализация
-        const quantum = new QuantumMessenger();
+        function switchTab(tabName) {
+            messenger.switchTab(tabName);
+        }
+
+        function closeChat() {
+            messenger.closeChat();
+        }
+
+        function sendMessage() {
+            messenger.sendMessage();
+        }
+
+        function toggleStickerPicker() {
+            messenger.toggleStickerPicker();
+        }
+
+        function openEditModal(field) {
+            messenger.openEditModal(field);
+        }
+
+        function closeModal() {
+            messenger.closeModal();
+        }
+
+        function saveModal() {
+            messenger.saveModal();
+        }
+
+        function createNewPost() {
+            messenger.createNewPost();
+        }
+
+        function closePostModal() {
+            messenger.closePostModal();
+        }
+
+        function publishPost() {
+            messenger.publishPost();
+        }
+
+        function changeAvatar() {
+            messenger.changeAvatar();
+        }
+
+        function searchUsers() {
+            document.getElementById('user-search').focus();
+        }
+
+        function closeImageViewer() {
+            messenger.closeImageViewer();
+        }
+
+        const messenger = new QuantumMessenger();
+
+        setInterval(() => {
+            messenger.updateOnlineStatus();
+        }, 30000);
+
+        setTimeout(() => {
+            messenger.updateOnlineStatus();
+        }, 1000);
     </script>
 </body>
 </html>
